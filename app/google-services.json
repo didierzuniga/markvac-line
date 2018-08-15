@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "370085081373",
+    "firebase_url": "https://markvac-line-1ede9.firebaseio.com",
+    "project_id": "markvac-line-1ede9",
+    "storage_bucket": "markvac-line-1ede9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370085081373:android:d2cbe7a68c94eb4e",
+        "android_client_info": {
+          "package_name": "com.markvac.line"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370085081373-dhn47gpgmdcqjuno8ndjjnnsjpbb6ds3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9-cirGEAUa8WS94h6DDiVVVQHyUwpdGE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

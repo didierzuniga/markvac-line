@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Line</string>
+    <string name="title_activity_tracing">Map</string>
+
+    <!--Drawer nav-->
+    <string name="title_tracing">Tracing</string>
+    <string name="title_history">History</string>
+    <string name="title_logout">Logout</string>
+
+    <!--Tracing-->
+    <string name="title_view">View</string>
+
+    <!--DRAWER NAVIGATION-->
+    <string name="title_activity_home"></string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+</resources>
