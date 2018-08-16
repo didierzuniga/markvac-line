@@ -2,6 +2,7 @@ package com.markvac.line.tracing.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.markvac.line.R;
+import com.markvac.line.customizer.History;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -85,6 +87,8 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.colorWhite)); //Change menu hamburguer color
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -96,7 +100,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         if (id == R.id.nav_tracing) {
             onStart();
         } else if (id == R.id.nav_history) {
-//            goHistory();
+            goHistory();
         } else if (id == R.id.nav_logout) {
 //            goLogout();
         }
@@ -104,6 +108,12 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void goHistory() {
+        Intent intent = new Intent(this, History.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override

@@ -29,7 +29,7 @@ public class Splash extends AppCompatActivity implements SplashView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        progressBar = (ProgressBar) findViewById(R.id.prgBarSplash);
+        progressBar = findViewById(R.id.prgBarSplash);
     }
 
     @Override
@@ -44,7 +44,6 @@ public class Splash extends AppCompatActivity implements SplashView {
 
     @Override
     public void goLogin() {
-//        timer.cancel();
         hideProgressBar();
         Intent intent = new Intent(this, Tracing.class);
         startActivity(intent);
@@ -81,25 +80,30 @@ public class Splash extends AppCompatActivity implements SplashView {
     @Override
     protected void onStart() {
         super.onStart();
+        showProgressBar();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(Splash.this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1);
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            goLogin();
+                        }
+                    }, 2000);
+                }
+            });
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        showProgressBar();
-//        timer = new Timer();
-//        timer.schedule(new login(), 1000, 1000);
     }
 
-//    public class login extends TimerTask {
-//        @Override
-//        public void run() {
-//            goLogin();
-//        }
-//    }
 }
