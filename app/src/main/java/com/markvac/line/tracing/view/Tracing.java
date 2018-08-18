@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,9 +28,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -49,6 +59,8 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
     private Polyline line; //added
     private ArrayList<String> arrCoords;
     private Set<String> set;
+    private SupportMapFragment mapFragment;
+    private int offset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +89,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
                     this);
         }
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -123,6 +135,12 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(true);
+        LatLng prueba = new LatLng(7.944498, -72.503353);
+        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+                .position(prueba, 500f, 800f);
+        mMap.addGroundOverlay(groundOverlayOptions);
+
     }
 
     private void redrawLine(){
@@ -189,13 +207,13 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
             editor.putStringSet("coords", set);
             editor.commit();
 
-            redrawLine(); //added
+//            redrawLine();
 
-            MarkerOptions mp = new MarkerOptions();
-            mp.position(latLng);
-            mMap.addMarker(mp);
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            mMap.animateCamera(cameraUpdate);
+//            MarkerOptions mp = new MarkerOptions();
+//            mp.position(latLng);
+//            mMap.addMarker(mp);
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+//            mMap.animateCamera(cameraUpdate);
         }
     }
 
