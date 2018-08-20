@@ -5,11 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,45 +18,36 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Tracing extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback, LocationListener, GpsStatus.Listener {
 
-    private GoogleApiClient apiClient;
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private SharedPreferences shaPref;
     private SharedPreferences.Editor editor;
-    private ArrayList<LatLng> points; //added
-    private Polyline line; //added
-    private ArrayList<String> arrCoords;
-    private Set<String> set;
+    private Polyline line;
     private SupportMapFragment mapFragment;
-    private int offset;
+    private JSONObject coordinatesJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +57,19 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.title_view));
 
-        set = new HashSet<String>();
+        coordinatesJson = new JSONObject();
         shaPref = getSharedPreferences("myShared", MODE_PRIVATE);
         editor = shaPref.edit();
-        points = new ArrayList<LatLng>();
-        arrCoords = new ArrayList<String>();
+
+        try {
+            if (shaPref.getString("coordenadas", null) != null){
+                JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordenadas", ""));
+                coordinatesJson = jsonFromShared;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
 
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -135,30 +130,30 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(true);
-        LatLng prueba = new LatLng(7.944498, -72.503353);
-        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
-                .position(prueba, 500f, 800f);
-        mMap.addGroundOverlay(groundOverlayOptions);
-
     }
 
     private void redrawLine(){
         mMap.clear();  //clears all Markers and Polylines
+        LatLng prueba = new LatLng(7.944498, -72.503353);
+        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+                .position(prueba, 600f, 900f);
+        mMap.addGroundOverlay(groundOverlayOptions);
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
-        for (int i = 0; i < arrCoords.size(); i++) {
-            String[] latlong =  arrCoords.get(i).split(", ");
-            double latitude = Double.parseDouble(latlong[0]);
-            double longitude = Double.parseDouble(latlong[1]);
-            LatLng point = new LatLng(latitude, longitude);
-            options.add(point);
-        }
-//        for (int i = 0; i < points.size(); i++) {
-//            LatLng point = points.get(i);
-//            options.add(point);
-//        }
 
-        //addMarker(); //add Marker in current position
+        for (int i = 0; i < coordinatesJson.length(); i++) {
+            try {
+                String toSplit = coordinatesJson.getString(String.valueOf(i));
+                String[] latlong = toSplit.split(", ");
+                double latitude = Double.parseDouble(latlong[0]);
+                double longitude = Double.parseDouble(latlong[1]);
+                LatLng point = new LatLng(latitude, longitude);
+                options.add(point);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
         line = mMap.addPolyline(options);
     }
 
@@ -169,11 +164,11 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
 //        // https://developers.google.com/maps/documentation/android/utility/
 //        // I have used this to display the time as title for location markers
 //        // you can safely comment the following four lines but for this info
-////        IconGenerator iconFactory = new IconGenerator(this);
-////        iconFactory.setStyle(IconGenerator.STYLE_PURPLE);
-////        // options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(mLastUpdateTime + requiredArea + city)));
-////        options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(requiredArea + ", " + city)));
-////        options.anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
+//        IconGenerator iconFactory = new IconGenerator(this);
+//        iconFactory.setStyle(IconGenerator.STYLE_PURPLE);
+//        options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(mLastUpdateTime + requiredArea + city)));
+//        options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(requiredArea + ", " + city)));
+//        options.anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 //        LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 //        options.position(currentLatLng);
 //        Marker mapMarker = mMap.addMarker(options);
@@ -183,8 +178,8 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
 //        mapMarker.setTitle(title);
 //
 //
-////        TextView mapTitle = (TextView) findViewById(R.id.textViewTitle);
-////        mapTitle.setText(title);
+//        TextView mapTitle = (TextView) findViewById(R.id.textViewTitle);
+//        mapTitle.setText(title);
 //
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,
 //                13));
@@ -201,19 +196,26 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             LatLng latLng = new LatLng(latitude, longitude); //you already have this
-            points.add(latLng); //added
-            arrCoords.add(latitude + ", " +longitude);
-            set.addAll(arrCoords);
-            editor.putStringSet("coords", set);
+
+            try {
+                String id = String.valueOf(coordinatesJson.length());
+                coordinatesJson.put(id, latitude + ", " +longitude);
+                Log.w("jjj", "coordinates length: "+coordinatesJson.length());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String stringToShared = coordinatesJson.toString();
+            editor.putString("coordenadas", stringToShared);
             editor.commit();
 
-//            redrawLine();
+            redrawLine();
 
-//            MarkerOptions mp = new MarkerOptions();
-//            mp.position(latLng);
-//            mMap.addMarker(mp);
-//            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-//            mMap.animateCamera(cameraUpdate);
+            MarkerOptions mp = new MarkerOptions();
+            mp.position(latLng);
+            mMap.addMarker(mp);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            mMap.animateCamera(cameraUpdate);
         }
     }
 
@@ -242,4 +244,8 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }
