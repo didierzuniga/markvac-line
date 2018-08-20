@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
@@ -20,6 +22,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,6 +51,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
     private Polyline line;
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
+    private FloatingActionButton btnPlayStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +91,17 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        btnPlayStop = findViewById(R.id.fabPlayStop);
+        int miColor = getResources().getColor(R.color.colorWhite);
+        ColorStateList csl = new ColorStateList(new int[][]{new int[0]}, new int[]{miColor});
+        btnPlayStop.setBackgroundTintList(csl);
+        btnPlayStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -200,7 +215,6 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
             try {
                 String id = String.valueOf(coordinatesJson.length());
                 coordinatesJson.put(id, latitude + ", " +longitude);
-                Log.w("jjj", "coordinates length: "+coordinatesJson.length());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
