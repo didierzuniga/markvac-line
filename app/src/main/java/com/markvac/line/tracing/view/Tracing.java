@@ -96,10 +96,29 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         int miColor = getResources().getColor(R.color.colorWhite);
         ColorStateList csl = new ColorStateList(new int[][]{new int[0]}, new int[]{miColor});
         btnPlayStop.setBackgroundTintList(csl);
+        if (shaPref.getBoolean("allowRedrawLine", false)){
+            // If button was playing, change to Stop
+            btnPlayStop.setImageResource(R.drawable.ic_stop);
+        } else {
+            // If button was stopped, change to playing
+            btnPlayStop.setImageResource(R.drawable.ic_play);
+        }
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (shaPref.getBoolean("allowRedrawLine", false)){
+                    Log.w("jjj", "Cambio a Stop");
+                    // If button was playing, change to Stop
+                    btnPlayStop.setImageResource(R.drawable.ic_play);
+                    editor.putBoolean("allowRedrawLine", false);
+                    editor.commit();
+                } else {
+                    Log.w("jjj", "Cambio a Play");
+                    // If button was stopped, change to playing
+                    btnPlayStop.setImageResource(R.drawable.ic_stop);
+                    editor.putBoolean("allowRedrawLine", true);
+                    editor.commit();
+                }
             }
         });
 
@@ -148,12 +167,8 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
     }
 
     private void redrawLine(){
-        mMap.clear();  //clears all Markers and Polylines
-        LatLng prueba = new LatLng(7.944498, -72.503353);
-        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
-                .position(prueba, 600f, 900f);
-        mMap.addGroundOverlay(groundOverlayOptions);
+        //mMap.clear();  //clears all Markers and Polylines
+
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
 
         for (int i = 0; i < coordinatesJson.length(); i++) {
@@ -208,22 +223,33 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
     @Override
     public void onLocationChanged(Location location) {
         if (location != null){
+            mMap.clear();
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             LatLng latLng = new LatLng(latitude, longitude); //you already have this
 
-            try {
-                String id = String.valueOf(coordinatesJson.length());
-                coordinatesJson.put(id, latitude + ", " +longitude);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
+            LatLng prueba = new LatLng(7.944498, -72.503353);
+            GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+                    .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+                    .position(prueba, 600f, 900f);
+            mMap.addGroundOverlay(groundOverlayOptions);
+            // END - Traido aquí para que la imagen del mapa añadido no se cambie
+
+            if(shaPref.getBoolean("allowRedrawLine", false)){
+                try {
+                    String id = String.valueOf(coordinatesJson.length());
+                    coordinatesJson.put(id, latitude + ", " +longitude);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                String stringToShared = coordinatesJson.toString();
+                editor.putString("coordenadas", stringToShared);
+                editor.commit();
+
+                redrawLine();
             }
-
-            String stringToShared = coordinatesJson.toString();
-            editor.putString("coordenadas", stringToShared);
-            editor.commit();
-
-            redrawLine();
 
             MarkerOptions mp = new MarkerOptions();
             mp.position(latLng);
