@@ -1,10 +1,33 @@
 apply plugin: 'com.android.application'
 
 def GOOGLE_MAPS_KEY_DEBUG = '"' + GoogleMapsKeyDebug + '"' ?: '"No Maps"';
-
 android.buildTypes.each { type ->
     type.resValue 'string', 'GOOGLE_MAPS_KEY_DEBUG', GOOGLE_MAPS_KEY_DEBUG
     type.buildConfigField 'String', 'GOOGLE_MAPS_KEY_DEBUG', GOOGLE_MAPS_KEY_DEBUG
+}
+
+def GOOGLE_MAPS_FOR_DIRECTIONS = '"' + GoogleMapsForDirections + '"' ?: '"No Maps For Directions"';
+android.buildTypes.each { type ->
+    type.resValue 'string', 'GOOGLE_MAPS_FOR_DIRECTIONS', GOOGLE_MAPS_FOR_DIRECTIONS
+    type.buildConfigField 'String', 'GOOGLE_MAPS_FOR_DIRECTIONS', GOOGLE_MAPS_FOR_DIRECTIONS
+}
+
+def DIRECTION_URL_API = '"' + DirectionUrlApi + '"' ?: '"No Connected To Direction Url API"';
+android.buildTypes.each { type ->
+    type.resValue 'string', 'DIRECTION_URL_API', DIRECTION_URL_API
+    type.buildConfigField 'String', 'DIRECTION_URL_API', DIRECTION_URL_API
+}
+
+def FIREBASE_DATABASE_LOCATION = '"' + FirebaseDatabaseLocation + '"' ?: '"No Maps"';
+android.buildTypes.each { type ->
+    type.resValue 'string', 'FIREBASE_DATABASE_LOCATION', FIREBASE_DATABASE_LOCATION
+    type.buildConfigField 'String', 'FIREBASE_DATABASE_LOCATION', FIREBASE_DATABASE_LOCATION
+}
+
+def API_DATE_TIME = '"' + ApiDateTime + '"' ?: '"No Maps"';
+android.buildTypes.each { type ->
+    type.resValue 'string', 'API_DATE_TIME', API_DATE_TIME
+    type.buildConfigField 'String', 'API_DATE_TIME', API_DATE_TIME
 }
 
 android {

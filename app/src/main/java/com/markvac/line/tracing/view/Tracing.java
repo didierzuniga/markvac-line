@@ -2,6 +2,7 @@ package com.markvac.line.tracing.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,12 +12,14 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -45,6 +48,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         OnMapReadyCallback, LocationListener, GpsStatus.Listener {
 
     private GoogleMap mMap;
+    private AlertDialog alert = null;
     private LocationManager mLocationManager;
     private SharedPreferences shaPref;
     private SharedPreferences.Editor editor;
@@ -107,17 +111,20 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
             @Override
             public void onClick(View v) {
                 if (shaPref.getBoolean("allowRedrawLine", false)){
-                    Log.w("jjj", "Cambio a Stop");
                     // If button was playing, change to Stop
                     btnPlayStop.setImageResource(R.drawable.ic_play);
                     editor.putBoolean("allowRedrawLine", false);
                     editor.commit();
                 } else {
-                    Log.w("jjj", "Cambio a Play");
                     // If button was stopped, change to playing
                     btnPlayStop.setImageResource(R.drawable.ic_stop);
                     editor.putBoolean("allowRedrawLine", true);
                     editor.commit();
+
+                    // Coloco 5 puntos minimo para guardar como recorrido
+                    if (coordinatesJson.length() > 5){
+                        confirmStoreCoordinates();
+                    }
                 }
             }
         });
@@ -130,6 +137,26 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.colorWhite)); //Change menu hamburguer color
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    public void confirmStoreCoordinates(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.message_successful_travel)
+                .setCancelable(false)
+                .setPositiveButton(R.string.message_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Response YES
+                        //Antes de almacenar en DB calcular distancia y tiempo
+                    }
+                }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Response NO
+            }
+        });
+        alert = builder.create();
+        alert.show();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

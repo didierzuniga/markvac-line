@@ -9,10 +9,15 @@
 
     <!--Tracing-->
     <string name="title_view">Vista</string>
+    <string name="message_successful_travel">¿Recorrido exitoso?</string>
 
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
+
+    <!--GENERALS-->
+    <string name="message_yes">Si</string>
+    <string name="message_no">No</string>
 </resources>
