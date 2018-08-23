@@ -18,13 +18,13 @@ android.buildTypes.each { type ->
     type.buildConfigField 'String', 'DIRECTION_URL_API', DIRECTION_URL_API
 }
 
-def FIREBASE_DATABASE_LOCATION = '"' + FirebaseDatabaseLocation + '"' ?: '"No Maps"';
+def FIREBASE_DATABASE_LOCATION = '"' + FirebaseDatabaseLocation + '"' ?: '"No Database"';
 android.buildTypes.each { type ->
     type.resValue 'string', 'FIREBASE_DATABASE_LOCATION', FIREBASE_DATABASE_LOCATION
     type.buildConfigField 'String', 'FIREBASE_DATABASE_LOCATION', FIREBASE_DATABASE_LOCATION
 }
 
-def API_DATE_TIME = '"' + ApiDateTime + '"' ?: '"No Maps"';
+def API_DATE_TIME = '"' + ApiDateTime + '"' ?: '"No API Datetime"';
 android.buildTypes.each { type ->
     type.resValue 'string', 'API_DATE_TIME', API_DATE_TIME
     type.buildConfigField 'String', 'API_DATE_TIME', API_DATE_TIME
@@ -70,6 +70,9 @@ dependencies {
     implementation 'com.android.support:support-annotations:27.1.1'
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:24.2.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
 
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.android.gms:play-services-location:10.0.1'

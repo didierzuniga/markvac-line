@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,8 +25,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,11 +44,13 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
+import com.markvac.line.tracing.presenter.TracingPresenter;
+import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Tracing extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback, LocationListener, GpsStatus.Listener {
 
     private GoogleMap mMap;
@@ -56,6 +62,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
     private FloatingActionButton btnPlayStop;
+    private TracingPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +72,7 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.title_view));
 
+        presenter = new TracingPresenterImpl(this);
         coordinatesJson = new JSONObject();
         shaPref = getSharedPreferences("myShared", MODE_PRIVATE);
         editor = shaPref.edit();
@@ -115,16 +123,16 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
                     btnPlayStop.setImageResource(R.drawable.ic_play);
                     editor.putBoolean("allowRedrawLine", false);
                     editor.commit();
+
+                    // Coloco 5 puntos minimo para guardar como recorrido
+                    if (coordinatesJson.length() > 2){
+                        confirmStoreCoordinates();
+                    }
                 } else {
                     // If button was stopped, change to playing
                     btnPlayStop.setImageResource(R.drawable.ic_stop);
                     editor.putBoolean("allowRedrawLine", true);
                     editor.commit();
-
-                    // Coloco 5 puntos minimo para guardar como recorrido
-                    if (coordinatesJson.length() > 5){
-                        confirmStoreCoordinates();
-                    }
                 }
             }
         });
@@ -147,7 +155,9 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Response YES
-                        //Antes de almacenar en DB calcular distancia y tiempo
+                        //Antes de almacenar en DB calcular distancia y tiempo y fecha
+                        String coordinates = shaPref.getString("coordenadas", null);
+                        presenter.saveCoordinates(coordinates);
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override
@@ -157,6 +167,20 @@ public class Tracing extends AppCompatActivity implements NavigationView.OnNavig
         });
         alert = builder.create();
         alert.show();
+    }
+
+    @Override
+    public void successfulStore() {
+        View parentLayout = findViewById(android.R.id.content);
+        Snackbar snk = Snackbar.make(parentLayout, getString(R.string.toast_successful_store),
+                Snackbar.LENGTH_SHORT);
+        View snackBarView = snk.getView();
+        snackBarView.setBackgroundColor(getResources().getColor(R.color.snackbar_green));
+        TextView textView = snackBarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_text));
+        textView.setTextColor(Color.WHITE);
+        snk.setDuration(2000);
+        snk.show();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

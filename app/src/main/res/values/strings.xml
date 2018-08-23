@@ -10,6 +10,7 @@
     <!--Tracing-->
     <string name="title_view">Vista</string>
     <string name="message_successful_travel">¿Recorrido exitoso?</string>
+    <string name="toast_successful_store">¡Carga exitosa!</string>
 
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>

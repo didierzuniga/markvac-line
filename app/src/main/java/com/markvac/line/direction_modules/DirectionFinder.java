@@ -1,6 +1,7 @@
 package com.markvac.line.direction_modules;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -117,7 +118,6 @@ public class DirectionFinder {
 
             routes.add(route);
         }
-
         listener.onDirectionFinderSuccess(routes);
     }
 
