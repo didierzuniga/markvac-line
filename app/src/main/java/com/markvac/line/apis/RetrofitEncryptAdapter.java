@@ -6,12 +6,12 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by unicorn on 8/22/2018.
+ * Created by unicorn on 8/26/2018.
  */
 
-public class RetrofitDatetimeAdapter {
+public class RetrofitEncryptAdapter {
     Retrofit retrofit;
-    public RetrofitDatetimeAdapter(){
+    public RetrofitEncryptAdapter(){
     }
 
     public Retrofit getAdapter(){

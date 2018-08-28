@@ -26,15 +26,16 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/GOOGLE_MAPS_KEY_DEBUG" />
 
-        <activity android:name=".login.Splash">
+        <activity android:name=".login.view.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".tracing.view.Tracing"></activity>
-        <activity android:name=".customizer.History"></activity>
+        <activity android:name=".tracing.view.Tracing" />
+        <activity android:name=".customizer.History" />
+        <activity android:name=".login.view.Signin"></activity>
     </application>
 
 </manifest>

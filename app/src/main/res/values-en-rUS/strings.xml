@@ -3,6 +3,11 @@
     <string name="app_name">Line</string>
     <string name="title_activity_tracing">Map</string>
 
+    <!--Signin-->
+    <string name="hint_username">Id. personal number</string>
+    <string name="hint_password">Password</string>
+    <string name="button_signin">Signin</string>
+
     <!--Drawer nav-->
     <string name="title_tracing">Tracing</string>
     <string name="title_history">History</string>

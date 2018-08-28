@@ -2,6 +2,11 @@
     <string name="app_name">Line</string>
     <string name="title_activity_tracing">Map</string>
 
+    <!--Signin-->
+    <string name="hint_username">Número de documento</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="button_signin">Ingresar</string>
+
     <!--Drawer nav-->
     <string name="title_tracing">Rastreo</string>
     <string name="title_history">Historiales</string>

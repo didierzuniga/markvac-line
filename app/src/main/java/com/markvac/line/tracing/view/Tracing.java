@@ -74,12 +74,12 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
         presenter = new TracingPresenterImpl(this);
         coordinatesJson = new JSONObject();
-        shaPref = getSharedPreferences("myShared", MODE_PRIVATE);
+        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
         editor = shaPref.edit();
 
         try {
-            if (shaPref.getString("coordenadas", null) != null){
-                JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordenadas", ""));
+            if (shaPref.getString("coordsTracing", null) != null){
+                JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordsTracing", ""));
                 coordinatesJson = jsonFromShared;
             }
         } catch (JSONException e) {
@@ -156,7 +156,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     public void onClick(DialogInterface dialog, int which) {
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
-                        String coordinates = shaPref.getString("coordenadas", null);
+                        String coordinates = shaPref.getString("coordsTracing", null);
                         presenter.saveCoordinates(coordinates);
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
@@ -296,7 +296,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 }
 
                 String stringToShared = coordinatesJson.toString();
-                editor.putString("coordenadas", stringToShared);
+                editor.putString("coordsTracing", stringToShared);
                 editor.commit();
 
                 redrawLine();

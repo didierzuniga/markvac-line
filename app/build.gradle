@@ -24,10 +24,10 @@ android.buildTypes.each { type ->
     type.buildConfigField 'String', 'FIREBASE_DATABASE_LOCATION', FIREBASE_DATABASE_LOCATION
 }
 
-def API_DATE_TIME = '"' + ApiDateTime + '"' ?: '"No API Datetime"';
+def API_PYTHON = '"' + ApiPython + '"' ?: '"No APIs Python"';
 android.buildTypes.each { type ->
-    type.resValue 'string', 'API_DATE_TIME', API_DATE_TIME
-    type.buildConfigField 'String', 'API_DATE_TIME', API_DATE_TIME
+    type.resValue 'string', 'API_PYTHON', API_PYTHON
+    type.buildConfigField 'String', 'API_PYTHON', API_PYTHON
 }
 
 android {

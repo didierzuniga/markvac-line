@@ -1,4 +1,4 @@
-package com.markvac.line.login;
+package com.markvac.line.login.view;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,18 +12,14 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.markvac.line.R;
 import com.markvac.line.tracing.view.Tracing;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class Splash extends AppCompatActivity implements SplashView {
 
     private ProgressBar progressBar;
-    private Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +39,9 @@ public class Splash extends AppCompatActivity implements SplashView {
     }
 
     @Override
-    public void goLogin() {
+    public void goSignin() {
         hideProgressBar();
-        Intent intent = new Intent(this, Tracing.class);
+        Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
         finish();
     }
@@ -61,7 +57,7 @@ public class Splash extends AppCompatActivity implements SplashView {
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    goLogin();
+                                    goSignin();
                                 }
                             }, 2000);
                         }
@@ -93,7 +89,7 @@ public class Splash extends AppCompatActivity implements SplashView {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            goLogin();
+                            goSignin();
                         }
                     }, 2000);
                 }

@@ -1,4 +1,4 @@
-package com.markvac.line.login;
+package com.markvac.line.login.view;
 
 /**
  * Created by unicorn on 8/14/2018.
@@ -7,5 +7,5 @@ package com.markvac.line.login;
 public interface SplashView {
     void showProgressBar();
     void hideProgressBar();
-    void goLogin();
+    void goSignin();
 }
