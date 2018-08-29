@@ -6,6 +6,10 @@
     <string name="hint_username">Número de documento</string>
     <string name="hint_password">Contraseña</string>
     <string name="button_signin">Ingresar</string>
+    <string name="toast_required_fields">Diligencie todos los campos</string>
+    <string name="toast_invalid_password">¡Contraseña inválida!</string>
+    <string name="toast_user_not_registered">¡Usuario no registrado!</string>
+    <string name="toast_dni_not_exist">¡Número de documento erróneo!</string>
 
     <!--Drawer nav-->
     <string name="title_tracing">Rastreo</string>

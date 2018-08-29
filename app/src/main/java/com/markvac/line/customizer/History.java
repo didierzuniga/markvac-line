@@ -10,10 +10,14 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.markvac.line.R;
+import com.markvac.line.login.view.Signin;
 import com.markvac.line.tracing.view.Tracing;
 
 public class History extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +49,7 @@ public class History extends AppCompatActivity implements NavigationView.OnNavig
         } else if (id == R.id.nav_history) {
             onStart();
         } else if (id == R.id.nav_logout) {
-//            goLogout();
+            goLogout();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -55,6 +59,13 @@ public class History extends AppCompatActivity implements NavigationView.OnNavig
 
     public void goTracing() {
         Intent intent = new Intent(this, Tracing.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void goLogout(){
+        firebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
         finish();
     }

@@ -1,7 +1,9 @@
 package com.markvac.line.login.presenter;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.markvac.line.login.interactor.SigninInteractor;
 import com.markvac.line.login.interactor.SigninInteractorImpl;
+import com.markvac.line.login.view.Signin;
 import com.markvac.line.login.view.SigninView;
 
 /**
@@ -16,5 +18,25 @@ public class SigninPresenterImpl implements SigninPresenter {
     public SigninPresenterImpl(SigninView view) {
         this.view = view;
         interactor = new SigninInteractorImpl(this);
+    }
+
+    @Override
+    public void signin(String username, String password, Signin signin, FirebaseAuth firebaseAuth) {
+        interactor.signin(username, password, signin, firebaseAuth);
+    }
+
+    @Override
+    public void signinError(String error) {
+        view.signinError(error);
+    }
+
+    @Override
+    public void signinSuccess(String username, String email, String uid) {
+        view.signinSuccess(username, email, uid);
+    }
+
+    @Override
+    public void dniNotExist() {
+        view.dniNotExist();
     }
 }

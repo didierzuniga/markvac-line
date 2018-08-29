@@ -7,6 +7,10 @@
     <string name="hint_username">Id. personal number</string>
     <string name="hint_password">Password</string>
     <string name="button_signin">Signin</string>
+    <string name="toast_required_fields">All fields is required</string>
+    <string name="toast_invalid_password">Invalid password!</string>
+    <string name="toast_user_not_registered">Unregistered user!</string>
+    <string name="toast_dni_not_exist">Wrong document number!</string>
 
     <!--Drawer nav-->
     <string name="title_tracing">Tracing</string>

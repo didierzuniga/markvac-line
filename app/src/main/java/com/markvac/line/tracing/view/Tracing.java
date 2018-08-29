@@ -42,8 +42,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.markvac.line.LineApplication;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
+import com.markvac.line.login.view.Signin;
 import com.markvac.line.tracing.presenter.TracingPresenter;
 import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
@@ -53,6 +56,7 @@ import org.json.JSONObject;
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback, LocationListener, GpsStatus.Listener {
 
+    private FirebaseAuth firebaseAuth;
     private GoogleMap mMap;
     private AlertDialog alert = null;
     private LocationManager mLocationManager;
@@ -62,6 +66,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
     private FloatingActionButton btnPlayStop;
+    private LineApplication app;
     private TracingPresenter presenter;
 
     @Override
@@ -73,6 +78,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         getSupportActionBar().setTitle(getString(R.string.title_view));
 
         presenter = new TracingPresenterImpl(this);
+        app = (LineApplication) getApplicationContext();
+
         coordinatesJson = new JSONObject();
         shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
         editor = shaPref.edit();
@@ -194,7 +201,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         } else if (id == R.id.nav_history) {
             goHistory();
         } else if (id == R.id.nav_logout) {
-//            goLogout();
+            goLogout();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -204,6 +211,13 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     public void goHistory() {
         Intent intent = new Intent(this, History.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void goLogout(){
+        firebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
         finish();
     }
