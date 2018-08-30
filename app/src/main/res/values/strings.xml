@@ -2,6 +2,9 @@
     <string name="app_name">Line</string>
     <string name="title_activity_tracing">Map</string>
 
+    <!--Splash-->
+    <string name="alert_gps_deactivate">¿Activar GPS en alta precisión?</string>
+
     <!--Signin-->
     <string name="hint_username">Número de documento</string>
     <string name="hint_password">Contraseña</string>

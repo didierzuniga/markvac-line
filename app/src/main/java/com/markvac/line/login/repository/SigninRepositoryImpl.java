@@ -44,17 +44,22 @@ public class SigninRepositoryImpl implements SigninRepository {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     if ((snapshot.getKey()).equals(username)){
                         thereUsername = true;
-                        User user = snapshot.getValue(User.class);
+                        final User user = snapshot.getValue(User.class);
                         final String email = user.getEmail();
+
                         firebaseAuth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                                     @Override
                                     public void onComplete(@NonNull Task<AuthResult> task) {
                                         if (task.isSuccessful()){
-                                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                                            if (user != null) {
-                                                presenter.signinSuccess(username, email, user.getUid());
-                                            }
+                                            FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+                                            if (userAuth != null) {
+                                                presenter.signinSuccess(username,
+                                                                        email,
+                                                                        userAuth.getUid(),
+                                                                        user.getCompany(),
+                                                                        user.getPosition());
+                                                }
                                         } else {
                                             presenter.signinError(task.getException().getMessage());
                                         }

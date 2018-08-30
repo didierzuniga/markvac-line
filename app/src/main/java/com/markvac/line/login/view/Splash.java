@@ -1,30 +1,43 @@
 package com.markvac.line.login.view;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.markvac.line.LineApplication;
 import com.markvac.line.R;
+import com.markvac.line.login.presenter.SplashPresenter;
+import com.markvac.line.login.presenter.SplashPresenterImpl;
 import com.markvac.line.tracing.view.Tracing;
 
 import java.util.Timer;
 
 public class Splash extends AppCompatActivity implements SplashView {
 
+    private AlertDialog alert = null;
     private ProgressBar progressBar;
+    private LineApplication app;
+    private SplashPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        app = (LineApplication) getApplicationContext();
+        presenter = new SplashPresenterImpl(this);
+
         progressBar = findViewById(R.id.prgBarSplash);
     }
 
@@ -44,6 +57,34 @@ public class Splash extends AppCompatActivity implements SplashView {
         Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void goTracing() {
+        hideProgressBar();
+        Intent intent = new Intent(this, Tracing.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void alertNoGps() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.alert_gps_deactivate)
+                .setCancelable(false)
+                .setPositiveButton(R.string.message_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Splash.super.finish();
+            }
+        });
+        alert = builder.create();
+        alert.show();
     }
 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -82,6 +123,7 @@ public class Splash extends AppCompatActivity implements SplashView {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1);
         } else {
+            showProgressBar();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -89,11 +131,12 @@ public class Splash extends AppCompatActivity implements SplashView {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            goSignin();
+                            presenter.verifyNetworkAndInternet(Splash.this, app.isOnline(), app.firebaseUser, app.uid);
                         }
-                    }, 2000);
+                    }, 1500);
                 }
             });
+
         }
     }
 

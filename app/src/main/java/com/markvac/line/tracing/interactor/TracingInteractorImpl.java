@@ -22,7 +22,7 @@ import java.util.List;
 public class TracingInteractorImpl implements TracingInteractor, DirectionFinderListener {
 
     private JSONObject coordinatesJson;
-    private String coords;
+    private String coords, userId;
     private int counter = 0, distance = 0, duration = 0;
 
     private TracingPresenter presenter;
@@ -34,8 +34,9 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
     }
 
     @Override
-    public void saveCoordinates(String coordinates) {
+    public void saveCoordinates(String coordinates, String username) {
         coords = coordinates;
+        userId = username;
         calculateDistanceAndTime(coordinates);
     }
 
@@ -78,7 +79,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
         }
 
         if (counter == (coordinatesJson.length() - 1)){
-            repository.saveCoordinates(coords, duration, distance);
+            repository.saveCoordinates(coords, duration, distance, userId);
         }
     }
 }

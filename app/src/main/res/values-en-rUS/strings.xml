@@ -3,6 +3,9 @@
     <string name="app_name">Line</string>
     <string name="title_activity_tracing">Map</string>
 
+    <!--Splash-->
+    <string name="alert_gps_deactivate">Activate GPS in high precision?</string>
+
     <!--Signin-->
     <string name="hint_username">Id. personal number</string>
     <string name="hint_password">Password</string>

@@ -8,7 +8,7 @@ public class User {
     public boolean active;
     public String company;
     public String email;
-    public int position;
+    public String position;
 
     public User() {
     }
@@ -25,7 +25,7 @@ public class User {
         return email;
     }
 
-    public int getPosition() {
+    public String getPosition() {
         return position;
     }
 }

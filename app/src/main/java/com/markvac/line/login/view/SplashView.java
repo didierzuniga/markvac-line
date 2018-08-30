@@ -8,4 +8,6 @@ public interface SplashView {
     void showProgressBar();
     void hideProgressBar();
     void goSignin();
+    void goTracing();
+    void alertNoGps();
 }

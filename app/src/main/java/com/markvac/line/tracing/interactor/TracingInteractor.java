@@ -5,5 +5,5 @@ package com.markvac.line.tracing.interactor;
  */
 
 public interface TracingInteractor {
-    void saveCoordinates(String coordinates);
+    void saveCoordinates(String coordinates, String username);
 }

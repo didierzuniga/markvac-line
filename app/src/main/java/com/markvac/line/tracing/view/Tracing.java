@@ -53,6 +53,8 @@ import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
+
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback, LocationListener, GpsStatus.Listener {
 
@@ -126,7 +128,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             @Override
             public void onClick(View v) {
                 if (shaPref.getBoolean("allowRedrawLine", false)){
-                    // If button was playing, change to Stop
                     btnPlayStop.setImageResource(R.drawable.ic_play);
                     editor.putBoolean("allowRedrawLine", false);
                     editor.commit();
@@ -136,7 +137,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                         confirmStoreCoordinates();
                     }
                 } else {
-                    // If button was stopped, change to playing
                     btnPlayStop.setImageResource(R.drawable.ic_stop);
                     editor.putBoolean("allowRedrawLine", true);
                     editor.commit();
@@ -164,7 +164,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
                         String coordinates = shaPref.getString("coordsTracing", null);
-                        presenter.saveCoordinates(coordinates);
+                        presenter.saveCoordinates(coordinates, app.username);
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override
@@ -188,6 +188,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         textView.setTextColor(Color.WHITE);
         snk.setDuration(2000);
         snk.show();
+        coordinatesJson = new JSONObject(); // Prueba
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

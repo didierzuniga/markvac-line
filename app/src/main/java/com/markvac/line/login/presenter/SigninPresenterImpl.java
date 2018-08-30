@@ -31,8 +31,8 @@ public class SigninPresenterImpl implements SigninPresenter {
     }
 
     @Override
-    public void signinSuccess(String username, String email, String uid) {
-        view.signinSuccess(username, email, uid);
+    public void signinSuccess(String username, String email, String uid, String company, String position) {
+        view.signinSuccess(username, email, uid, company, position);
     }
 
     @Override

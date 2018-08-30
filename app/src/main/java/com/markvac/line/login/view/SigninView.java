@@ -10,6 +10,6 @@ public interface SigninView {
     void enableInputs();
     void disableInputs();
     void signinError(String error);
-    void signinSuccess(String username, String email, String uid);
+    void signinSuccess(String username, String email, String uid, String company, String position);
     void dniNotExist();
 }

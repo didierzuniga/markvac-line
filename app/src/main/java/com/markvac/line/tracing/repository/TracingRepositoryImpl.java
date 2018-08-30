@@ -2,11 +2,15 @@ package com.markvac.line.tracing.repository;
 
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.markvac.line.apis.RetrofitDatetimeAdapter;
 import com.markvac.line.apis.RetrofitDatetimeService;
 import com.markvac.line.models.Time;
+import com.markvac.line.models.User;
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.presenter.TracingPresenter;
 
@@ -30,11 +34,12 @@ public class TracingRepositoryImpl implements TracingRepository {
     private TracingInteractor interactor;
 
     private Timer timer;
-    private String coords, dateNow, timeNow;
+    private String coords, dateNow, timeNow, username;
     private int durat, distan;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference reference = database.getReference("company_one/tracing/");
+    DatabaseReference referenceCompanies = database.getReference("companies");
+    DatabaseReference referenceUsers = database.getReference("users");
 
     public TracingRepositoryImpl(TracingPresenter presenter, TracingInteractor interactor) {
         this.presenter = presenter;
@@ -42,10 +47,11 @@ public class TracingRepositoryImpl implements TracingRepository {
     }
 
     @Override
-    public void saveCoordinates(String coordinates, int duration, int distance) {
+    public void saveCoordinates(String coordinates, int duration, int distance, String userId) {
         coords = coordinates;
         durat = duration;
         distan = distance;
+        username = userId;
         //DATETIME
         Retrofit retrofit = new RetrofitDatetimeAdapter().getAdapter();
         RetrofitDatetimeService service = retrofit.create(RetrofitDatetimeService.class);
@@ -74,15 +80,29 @@ public class TracingRepositoryImpl implements TracingRepository {
         @Override
         public void run() {
             if (timeNow != null){
-                List<String> list = new ArrayList<>();
-                list.add(coords);
-                list.add(String.valueOf(durat));
-                list.add(String.valueOf(distan));
+                referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                            if ((snapshot.getKey()).equals(username)){
+                                User user = snapshot.getValue(User.class);
+                                String company = user.getCompany();
+                                String path = company + "/tracing/" + username;
+                                referenceCompanies.child(path).child(dateNow).child(timeNow).child("points").setValue(coords);
+                                referenceCompanies.child(path).child(dateNow).child(timeNow).child("duration").setValue(durat);
+                                referenceCompanies.child(path).child(dateNow).child(timeNow).child("distance").setValue(distan);
 
-                reference.child("employee_one").child(dateNow).child(timeNow).setValue(list);
+                                timer.cancel();
+                                presenter.successfulStore();
+                            }
+                        }
+                    }
 
-                timer.cancel();
-                presenter.successfulStore();
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         }
     }

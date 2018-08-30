@@ -5,5 +5,5 @@ package com.markvac.line.tracing.repository;
  */
 
 public interface TracingRepository {
-    void saveCoordinates(String coordinates, int duration, int distance);
+    void saveCoordinates(String coordinates, int duration, int distance, String userId);
 }

@@ -86,10 +86,12 @@ public class Signin extends AppCompatActivity implements SigninView {
     }
 
     @Override
-    public void signinSuccess(String username, String email, String uid) {
+    public void signinSuccess(String username, String email, String uid, String company, String position) {
         app.username = username;
         app.email = email;
         app.uid = uid;
+        app.company = company;
+        app.position = position;
         hideProgressBar();
         Intent intent = new Intent(this, Tracing.class);
         startActivity(intent);
