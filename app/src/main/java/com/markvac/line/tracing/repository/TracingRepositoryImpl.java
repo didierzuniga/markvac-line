@@ -13,6 +13,7 @@ import com.markvac.line.models.Time;
 import com.markvac.line.models.User;
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.presenter.TracingPresenter;
+import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public class TracingRepositoryImpl implements TracingRepository {
     public class sendData extends TimerTask {
         @Override
         public void run() {
-            if (timeNow != null){
+            if (timeNow != null || dateNow != null){
                 referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -94,6 +95,9 @@ public class TracingRepositoryImpl implements TracingRepository {
 
                                 timer.cancel();
                                 presenter.successfulStore();
+                                dateNow = null;
+                                timeNow = null;
+                                break;
                             }
                         }
                     }

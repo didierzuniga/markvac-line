@@ -117,6 +117,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         int miColor = getResources().getColor(R.color.colorWhite);
         ColorStateList csl = new ColorStateList(new int[][]{new int[0]}, new int[]{miColor});
         btnPlayStop.setBackgroundTintList(csl);
+
         if (shaPref.getBoolean("allowRedrawLine", false)){
             // If button was playing, change to Stop
             btnPlayStop.setImageResource(R.drawable.ic_stop);
@@ -124,6 +125,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             // If button was stopped, change to playing
             btnPlayStop.setImageResource(R.drawable.ic_play);
         }
+
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,6 +180,10 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     @Override
     public void successfulStore() {
+        editor.remove("coordsTracing");
+        editor.commit();
+        coordinatesJson = new JSONObject();
+
         View parentLayout = findViewById(android.R.id.content);
         Snackbar snk = Snackbar.make(parentLayout, getString(R.string.toast_successful_store),
                 Snackbar.LENGTH_SHORT);
@@ -188,7 +194,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         textView.setTextColor(Color.WHITE);
         snk.setDuration(2000);
         snk.show();
-        coordinatesJson = new JSONObject(); // Prueba
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

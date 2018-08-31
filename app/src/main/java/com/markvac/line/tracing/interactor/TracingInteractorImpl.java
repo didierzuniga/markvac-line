@@ -23,7 +23,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 
     private JSONObject coordinatesJson;
     private String coords, userId;
-    private int counter = 0, distance = 0, duration = 0;
+    private int counter, distance = 0, duration = 0;
 
     private TracingPresenter presenter;
     private TracingRepository repository;
@@ -35,6 +35,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 
     @Override
     public void saveCoordinates(String coordinates, String username) {
+        counter = 0;
         coords = coordinates;
         userId = username;
         calculateDistanceAndTime(coordinates);
@@ -52,7 +53,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
             try {
                 String latLonToSplit_1 = coordinatesJson.getString(String.valueOf(i));
                 String latLonToSplit_2 = coordinatesJson.getString(String.valueOf(i+1));
-
                 try {
                     new DirectionFinder(this, latLonToSplit_1, latLonToSplit_2).execute();
                 } catch (UnsupportedEncodingException e) {

@@ -1,5 +1,7 @@
 package com.markvac.line.tracing.presenter;
 
+import android.util.Log;
+
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.interactor.TracingInteractorImpl;
 import com.markvac.line.tracing.view.TracingView;
