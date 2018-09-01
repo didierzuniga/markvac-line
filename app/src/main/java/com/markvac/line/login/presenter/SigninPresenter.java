@@ -8,8 +8,8 @@ import com.markvac.line.login.view.Signin;
  */
 
 public interface SigninPresenter {
-    void signin(String username, String password, Signin signin, FirebaseAuth firebaseAuth);
+    void signin(String dni, String password, Signin signin, FirebaseAuth firebaseAuth);
     void signinError(String error);
-    void signinSuccess(String username, String email, String uid, String company, String position);
+    void signinSuccess(String dni, String email, String uid, String company, String position);
     void dniNotExist();
 }

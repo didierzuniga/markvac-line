@@ -1,6 +1,7 @@
 package com.markvac.line.login.view;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +23,8 @@ public class Signin extends AppCompatActivity implements SigninView {
     private Button buttonSignin;
     private ProgressBar progressBar;
     private FirebaseAuth firebaseAuth;
+    private SharedPreferences shaPref;
+    private SharedPreferences.Editor editor;
     private LineApplication app;
     private SigninPresenter presenter;
 
@@ -33,6 +36,9 @@ public class Signin extends AppCompatActivity implements SigninView {
         app = (LineApplication) getApplicationContext();
         presenter = new SigninPresenterImpl(this);
         firebaseAuth = FirebaseAuth.getInstance();
+
+        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
+        editor = shaPref.edit();
 
         fieldUsername = findViewById(R.id.idFieldUsername);
         fieldPassword = findViewById(R.id.idFieldPassword);
@@ -86,12 +92,15 @@ public class Signin extends AppCompatActivity implements SigninView {
     }
 
     @Override
-    public void signinSuccess(String username, String email, String uid, String company, String position) {
-        app.username = username;
+    public void signinSuccess(String dni, String email, String uid, String company, String position) {
+        app.dni = dni;
         app.email = email;
         app.uid = uid;
         app.company = company;
         app.position = position;
+        editor.putString("dni", dni);
+        editor.putString("company", company);
+        editor.commit();
         hideProgressBar();
         Intent intent = new Intent(this, Tracing.class);
         startActivity(intent);

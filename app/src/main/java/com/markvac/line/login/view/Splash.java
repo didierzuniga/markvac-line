@@ -131,7 +131,7 @@ public class Splash extends AppCompatActivity implements SplashView {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            presenter.verifyNetworkAndInternet(Splash.this, app.isOnline(), app.firebaseUser, app.uid);
+                            presenter.verifyNetworkAndInternet(Splash.this, app.isOnline(), app.firebaseUser, app.email);
                         }
                     }, 1500);
                 }

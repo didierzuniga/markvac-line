@@ -20,8 +20,8 @@ public class TracingPresenterImpl implements TracingPresenter {
     }
 
     @Override
-    public void saveCoordinates(String coordinates, String username) {
-        interactor.saveCoordinates(coordinates, username);
+    public void saveCoordinates(String coordinates, String dni, String company) {
+        interactor.saveCoordinates(coordinates, dni, company);
     }
 
     @Override

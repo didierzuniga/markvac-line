@@ -5,6 +5,6 @@ package com.markvac.line.tracing.presenter;
  */
 
 public interface TracingPresenter {
-    void saveCoordinates(String coordinates, String username);
+    void saveCoordinates(String coordinates, String dni, String company);
     void successfulStore();
 }

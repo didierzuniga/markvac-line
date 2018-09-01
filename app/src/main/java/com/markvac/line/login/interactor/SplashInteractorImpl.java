@@ -28,7 +28,7 @@ public class SplashInteractorImpl implements SplashInteractor {
     }
 
     @Override
-    public void verifyNetworkAndInternet(Activity activity, boolean isOnline, FirebaseUser firebaseUser, String uid) {
+    public void verifyNetworkAndInternet(Activity activity, boolean isOnline, FirebaseUser firebaseUser, String email) {
 
         locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
         boolean network_enabled = false;

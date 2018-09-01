@@ -21,8 +21,8 @@ public class SigninPresenterImpl implements SigninPresenter {
     }
 
     @Override
-    public void signin(String username, String password, Signin signin, FirebaseAuth firebaseAuth) {
-        interactor.signin(username, password, signin, firebaseAuth);
+    public void signin(String dni, String password, Signin signin, FirebaseAuth firebaseAuth) {
+        interactor.signin(dni, password, signin, firebaseAuth);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class SigninPresenterImpl implements SigninPresenter {
     }
 
     @Override
-    public void signinSuccess(String username, String email, String uid, String company, String position) {
-        view.signinSuccess(username, email, uid, company, position);
+    public void signinSuccess(String dni, String email, String uid, String company, String position) {
+        view.signinSuccess(dni, email, uid, company, position);
     }
 
     @Override

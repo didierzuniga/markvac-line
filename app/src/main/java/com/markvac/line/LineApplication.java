@@ -2,6 +2,7 @@ package com.markvac.line;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
@@ -19,16 +20,22 @@ public class LineApplication extends Application {
     private FirebaseAuth firebaseAuth;
     private ConnectivityManager connectivityManager;
     private boolean connected = false;
-    public String username, uid, email, company, position;
+    public String dni, uid, email, company, position;
+    private SharedPreferences shaPref;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
+
         firebaseAuth = FirebaseAuth.getInstance();
         if (firebaseAuth.getCurrentUser() != null){
             firebaseUser = firebaseAuth.getCurrentUser();
             uid = firebaseUser.getUid();
             email = firebaseUser.getEmail();
+            dni = shaPref.getString("dni", null);
+            company = shaPref.getString("company", null);
 
         } else {
             firebaseUser = null;

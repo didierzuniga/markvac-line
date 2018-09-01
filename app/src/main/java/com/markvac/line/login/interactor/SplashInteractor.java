@@ -9,5 +9,5 @@ import com.google.firebase.auth.FirebaseUser;
  */
 
 public interface SplashInteractor {
-    void verifyNetworkAndInternet(Activity activity, boolean isOnline, FirebaseUser firebaseUser, String uid);
+    void verifyNetworkAndInternet(Activity activity, boolean isOnline, FirebaseUser firebaseUser, String email);
 }

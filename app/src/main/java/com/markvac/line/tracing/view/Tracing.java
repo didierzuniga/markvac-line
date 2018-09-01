@@ -166,7 +166,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
                         String coordinates = shaPref.getString("coordsTracing", null);
-                        presenter.saveCoordinates(coordinates, app.username);
+                        presenter.saveCoordinates(coordinates, app.dni, app.company);
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override

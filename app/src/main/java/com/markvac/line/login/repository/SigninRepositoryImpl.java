@@ -37,12 +37,12 @@ public class SigninRepositoryImpl implements SigninRepository {
     }
 
     @Override
-    public void signin(final String username, final String password, final Activity activity, final FirebaseAuth firebaseAuth) {
+    public void signin(final String dni, final String password, final Activity activity, final FirebaseAuth firebaseAuth) {
         referenceUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    if ((snapshot.getKey()).equals(username)){
+                    if ((snapshot.getKey()).equals(dni)){
                         thereUsername = true;
                         final User user = snapshot.getValue(User.class);
                         final String email = user.getEmail();
@@ -54,7 +54,7 @@ public class SigninRepositoryImpl implements SigninRepository {
                                         if (task.isSuccessful()){
                                             FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
                                             if (userAuth != null) {
-                                                presenter.signinSuccess(username,
+                                                presenter.signinSuccess(dni,
                                                                         email,
                                                                         userAuth.getUid(),
                                                                         user.getCompany(),

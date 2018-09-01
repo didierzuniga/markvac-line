@@ -9,5 +9,5 @@ import com.google.firebase.auth.FirebaseAuth;
  */
 
 public interface SigninRepository {
-    void signin(String username, String password, Activity activity, FirebaseAuth firebaseAuth);
+    void signin(String dni, String password, Activity activity, FirebaseAuth firebaseAuth);
 }
