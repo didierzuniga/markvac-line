@@ -73,6 +73,7 @@ dependencies {
 
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.github.silvestrpredko:dot-progress-bar:1.1'
 
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.android.gms:play-services-location:10.0.1'

@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.silvestrpredko.dotprogressbar.DotProgressBar;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,6 +61,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     private FirebaseAuth firebaseAuth;
     private GoogleMap mMap;
+    private DotProgressBar dotProgressBar;
     private AlertDialog alert = null;
     private LocationManager mLocationManager;
     private SharedPreferences shaPref;
@@ -82,6 +84,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         presenter = new TracingPresenterImpl(this);
         app = (LineApplication) getApplicationContext();
 
+        dotProgressBar = findViewById(R.id.idDotProgress);
         coordinatesJson = new JSONObject();
         shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
         editor = shaPref.edit();
@@ -156,6 +159,22 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+    public void showProgressBar() {
+        dotProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgressBar() {
+        dotProgressBar.setVisibility(View.GONE);
+    }
+
+    public void disableButtons() {
+        btnPlayStop.setEnabled(false);
+    }
+
+    public void enableButtons() {
+        btnPlayStop.setEnabled(true);
+    }
+
     public void confirmStoreCoordinates(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.message_successful_travel)
@@ -165,6 +184,18 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     public void onClick(DialogInterface dialog, int which) {
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
+
+                        View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+                        v.setAlpha(0.5f); // Change this value to set the desired alpha
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showProgressBar();
+                                disableButtons();
+                            }
+                        });
+
                         String coordinates = shaPref.getString("coordsTracing", null);
                         presenter.saveCoordinates(coordinates, app.dni, app.company);
                     }
@@ -180,6 +211,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     @Override
     public void successfulStore() {
+        View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+        v.setAlpha(1.0f); // Change this value to set the desired alpha
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideProgressBar();
+                enableButtons();
+            }
+        });
+
         editor.remove("coordsTracing");
         editor.commit();
         coordinatesJson = new JSONObject();
@@ -188,12 +230,13 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         Snackbar snk = Snackbar.make(parentLayout, getString(R.string.toast_successful_store),
                 Snackbar.LENGTH_SHORT);
         View snackBarView = snk.getView();
-        snackBarView.setBackgroundColor(getResources().getColor(R.color.snackbar_green));
+        snackBarView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         TextView textView = snackBarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_text));
         textView.setTextColor(Color.WHITE);
         snk.setDuration(2000);
         snk.show();
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
