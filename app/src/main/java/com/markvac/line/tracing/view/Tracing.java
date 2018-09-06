@@ -44,6 +44,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.maps.android.data.kml.KmlContainer;
+import com.google.maps.android.data.kml.KmlLayer;
 import com.markvac.line.LineApplication;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
@@ -53,7 +55,9 @@ import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
@@ -342,12 +346,30 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             double longitude = location.getLongitude();
             LatLng latLng = new LatLng(latitude, longitude); //you already have this
 
+            try {
+                Log.w("jjj", "Entro");
+                KmlLayer layer = new KmlLayer(mMap, R.raw.doc, getApplicationContext());
+
+                layer.addLayerToMap();
+
+                for (KmlContainer containers : layer.getContainers()){
+//                    Log.w("jjj", "-> "+containers.getProperties());
+                }
+
+
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
             // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
-            LatLng prueba = new LatLng(7.944498, -72.503353);
-            GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-                    .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
-                    .position(prueba, 600f, 900f);
-            mMap.addGroundOverlay(groundOverlayOptions);
+//            LatLng prueba = new LatLng(7.944498, -72.503353);
+//            GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+//                    .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+//                    .position(prueba, 600f, 900f);
+//            mMap.addGroundOverlay(groundOverlayOptions);
             // END - Traido aquí para que la imagen del mapa añadido no se cambie
 
             if(shaPref.getBoolean("allowRedrawLine", false)){
@@ -365,11 +387,11 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 redrawLine();
             }
 
-            MarkerOptions mp = new MarkerOptions();
-            mp.position(latLng);
-            mMap.addMarker(mp);
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            mMap.animateCamera(cameraUpdate);
+//            MarkerOptions mp = new MarkerOptions();
+//            mp.position(latLng);
+//            mMap.addMarker(mp);
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+//            mMap.animateCamera(cameraUpdate);
         }
     }
 

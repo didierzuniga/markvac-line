@@ -81,6 +81,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:9.6.1'
     implementation 'com.google.firebase:firebase-database:10.0.1'
     implementation 'com.google.firebase:firebase-auth:10.0.1'
+    implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     testImplementation 'junit:junit:4.12'
