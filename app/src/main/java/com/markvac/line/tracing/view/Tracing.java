@@ -1,9 +1,11 @@
 package com.markvac.line.tracing.view;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -12,11 +14,13 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -48,6 +52,7 @@ import com.markvac.line.LineApplication;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
 import com.markvac.line.login.view.Signin;
+import com.markvac.line.services.GetCoordinates;
 import com.markvac.line.tracing.presenter.TracingPresenter;
 import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
@@ -57,13 +62,13 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
-        OnMapReadyCallback, LocationListener, GpsStatus.Listener {
+        OnMapReadyCallback {
 
     private FirebaseAuth firebaseAuth;
     private GoogleMap mMap;
     private DotProgressBar dotProgressBar;
     private AlertDialog alert = null;
-    private LocationManager mLocationManager;
+//    private LocationManager mLocationManager;
     private SharedPreferences shaPref;
     private SharedPreferences.Editor editor;
     private Polyline line;
@@ -84,33 +89,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         presenter = new TracingPresenterImpl(this);
         app = (LineApplication) getApplicationContext();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            startService(new Intent(this, GetCoordinates.class));
+        } else {
+            startService(new Intent(this, GetCoordinates.class));
+        }
+
         dotProgressBar = findViewById(R.id.idDotProgress);
         coordinatesJson = new JSONObject();
+
         shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
         editor = shaPref.edit();
-
-        try {
-            if (shaPref.getString("coordsTracing", null) != null){
-                JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordsTracing", ""));
-                coordinatesJson = jsonFromShared;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        if (mLocationManager != null) {
-            mLocationManager.addGpsStatusListener(this);
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    5000,
-                    0,
-                    this);
-        }
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -148,6 +137,18 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 }
             }
         });
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        double latitude = intent.getDoubleExtra("latitude", 0);
+                        double longitude = intent.getDoubleExtra("longitude", 0);
+
+                        processCoordinates(latitude, longitude);
+                    }
+                }, new IntentFilter(GetCoordinates.ACTION_GET_COORDINATES)
+        );
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -237,6 +238,13 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         snk.setDuration(2000);
         snk.show();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            stopService(new Intent(this, GetCoordinates.class));
+            startService(new Intent(this, GetCoordinates.class));
+        } else {
+            stopService(new Intent(this, GetCoordinates.class));
+            startService(new Intent(this, GetCoordinates.class));
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -265,6 +273,11 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     }
 
     public void goLogout(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            stopService(new Intent(this, GetCoordinates.class));
+        } else {
+            stopService(new Intent(this, GetCoordinates.class));
+        }
         firebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
@@ -285,6 +298,14 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
 
+        try {
+            JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordsTracing", ""));
+            coordinatesJson = jsonFromShared;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         for (int i = 0; i < coordinatesJson.length(); i++) {
             try {
                 String toSplit = coordinatesJson.getString(String.valueOf(i));
@@ -301,91 +322,39 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         line = mMap.addPolyline(options);
     }
 
-//    private void addMarker() {
-//        MarkerOptions options = new MarkerOptions();
+    public void processCoordinates(double latitude, double longitude) {
+        mMap.clear();
+
+        LatLng latLng = new LatLng(latitude, longitude); //you already have this
+
+        // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
+        LatLng prueba = new LatLng(7.944498, -72.503353);
+        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+                .position(prueba, 600f, 900f);
+        mMap.addGroundOverlay(groundOverlayOptions);
+        // END - Traido aquí para que la imagen del mapa añadido no se cambie
+
+        if(shaPref.getBoolean("allowRedrawLine", false)){
+//            try {
+//                String id = String.valueOf(coordinatesJson.length());
+//                coordinatesJson.put(id, latitude + ", " +longitude);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 //
-//        // following four lines requires 'Google Maps Android API Utility Library'
-//        // https://developers.google.com/maps/documentation/android/utility/
-//        // I have used this to display the time as title for location markers
-//        // you can safely comment the following four lines but for this info
-//        IconGenerator iconFactory = new IconGenerator(this);
-//        iconFactory.setStyle(IconGenerator.STYLE_PURPLE);
-//        options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(mLastUpdateTime + requiredArea + city)));
-//        options.icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(requiredArea + ", " + city)));
-//        options.anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
-//        LatLng currentLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-//        options.position(currentLatLng);
-//        Marker mapMarker = mMap.addMarker(options);
-//        long atTime = mCurrentLocation.getTime();
-//        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date(atTime));
-//        String title = mLastUpdateTime.concat(", " + requiredArea).concat(", " + city).concat(", " + country);
-//        mapMarker.setTitle(title);
-//
-//
-//        TextView mapTitle = (TextView) findViewById(R.id.textViewTitle);
-//        mapTitle.setText(title);
-//
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng,
-//                13));
-//    }
+//            String stringToShared = coordinatesJson.toString();
+//            editor.putString("coordsTracing", stringToShared);
+//            editor.commit();
 
-    @Override
-    public void onGpsStatusChanged(int event) {
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        if (location != null){
-            mMap.clear();
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            LatLng latLng = new LatLng(latitude, longitude); //you already have this
-
-            // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
-            LatLng prueba = new LatLng(7.944498, -72.503353);
-            GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-                    .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
-                    .position(prueba, 600f, 900f);
-            mMap.addGroundOverlay(groundOverlayOptions);
-            // END - Traido aquí para que la imagen del mapa añadido no se cambie
-
-            if(shaPref.getBoolean("allowRedrawLine", false)){
-                try {
-                    String id = String.valueOf(coordinatesJson.length());
-                    coordinatesJson.put(id, latitude + ", " +longitude);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                String stringToShared = coordinatesJson.toString();
-                editor.putString("coordsTracing", stringToShared);
-                editor.commit();
-
-                redrawLine();
-            }
-
-            MarkerOptions mp = new MarkerOptions();
-            mp.position(latLng);
-            mMap.addMarker(mp);
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            mMap.animateCamera(cameraUpdate);
+            redrawLine();
         }
-    }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
+        MarkerOptions mp = new MarkerOptions();
+        mp.position(latLng);
+        mMap.addMarker(mp);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+        mMap.animateCamera(cameraUpdate);
     }
 
     @Override

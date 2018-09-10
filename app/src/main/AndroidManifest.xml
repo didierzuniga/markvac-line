@@ -36,7 +36,12 @@
         </activity>
         <activity android:name=".tracing.view.Tracing" />
         <activity android:name=".customizer.History" />
-        <activity android:name=".login.view.Signin"></activity>
+        <activity android:name=".login.view.Signin" />
+
+        <service
+            android:name=".services.GetCoordinates"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

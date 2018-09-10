@@ -1,6 +1,7 @@
 package com.markvac.line.customizer;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.markvac.line.R;
 import com.markvac.line.login.view.Signin;
+import com.markvac.line.services.GetCoordinates;
 import com.markvac.line.tracing.view.Tracing;
 
 public class History extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -64,6 +66,11 @@ public class History extends AppCompatActivity implements NavigationView.OnNavig
     }
 
     public void goLogout(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            stopService(new Intent(this, GetCoordinates.class));
+        } else {
+            stopService(new Intent(this, GetCoordinates.class));
+        }
         firebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, Signin.class);
         startActivity(intent);
