@@ -68,9 +68,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private GoogleMap mMap;
     private DotProgressBar dotProgressBar;
     private AlertDialog alert = null;
-//    private LocationManager mLocationManager;
-    private SharedPreferences shaPref;
-    private SharedPreferences.Editor editor;
+//    private SharedPreferences shaPref;
+//    private SharedPreferences.Editor editor;
     private Polyline line;
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
@@ -89,17 +88,11 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         presenter = new TracingPresenterImpl(this);
         app = (LineApplication) getApplicationContext();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            startService(new Intent(this, GetCoordinates.class));
-        } else {
-            startService(new Intent(this, GetCoordinates.class));
-        }
-
         dotProgressBar = findViewById(R.id.idDotProgress);
         coordinatesJson = new JSONObject();
 
-        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
-        editor = shaPref.edit();
+//        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
+//        editor = shaPref.edit();
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -110,7 +103,13 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         ColorStateList csl = new ColorStateList(new int[][]{new int[0]}, new int[]{miColor});
         btnPlayStop.setBackgroundTintList(csl);
 
-        if (shaPref.getBoolean("allowRedrawLine", false)){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            startService(new Intent(this, GetCoordinates.class));
+        } else {
+            startService(new Intent(this, GetCoordinates.class));
+        }
+
+        if (app.shaPref.getBoolean("allowRedrawLine", false)){
             // If button was playing, change to Stop
             btnPlayStop.setImageResource(R.drawable.ic_stop);
         } else {
@@ -121,19 +120,23 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (shaPref.getBoolean("allowRedrawLine", false)){
+                if (app.shaPref.getBoolean("allowRedrawLine", false)){
                     btnPlayStop.setImageResource(R.drawable.ic_play);
-                    editor.putBoolean("allowRedrawLine", false);
-                    editor.commit();
 
                     // Coloco 5 puntos minimo para guardar como recorrido
+                    try {
+                        JSONObject jsonFromShared = new JSONObject(app.shaPref.getString("coordsTracing", ""));
+                        coordinatesJson = jsonFromShared;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     if (coordinatesJson.length() > 2){
                         confirmStoreCoordinates();
                     }
                 } else {
                     btnPlayStop.setImageResource(R.drawable.ic_stop);
-                    editor.putBoolean("allowRedrawLine", true);
-                    editor.commit();
+                    app.editor.putBoolean("allowRedrawLine", true);
+                    app.editor.commit();
                 }
             }
         });
@@ -144,7 +147,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     public void onReceive(Context context, Intent intent) {
                         double latitude = intent.getDoubleExtra("latitude", 0);
                         double longitude = intent.getDoubleExtra("longitude", 0);
-
                         processCoordinates(latitude, longitude);
                     }
                 }, new IntentFilter(GetCoordinates.ACTION_GET_COORDINATES)
@@ -185,7 +187,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     public void onClick(DialogInterface dialog, int which) {
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
-
+                        app.editor.putBoolean("allowRedrawLine", false);
+                        app.editor.commit();
                         View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
                         v.setAlpha(0.5f); // Change this value to set the desired alpha
 
@@ -197,13 +200,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                             }
                         });
 
-                        String coordinates = shaPref.getString("coordsTracing", null);
+                        String coordinates = app.shaPref.getString("coordsTracing", null);
                         presenter.saveCoordinates(coordinates, app.dni, app.company);
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Response NO
+                app.editor.putBoolean("allowRedrawLine", false);
+                app.editor.remove("coordsTracing");
+                app.editor.commit();
+                coordinatesJson = new JSONObject();
+                Toast.makeText(Tracing.this, getResources().getString(R.string.toast_not_store), Toast.LENGTH_SHORT).show();
             }
         });
         alert = builder.create();
@@ -223,8 +230,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             }
         });
 
-        editor.remove("coordsTracing");
-        editor.commit();
+        app.editor.remove("coordsTracing");
+        app.editor.commit();
         coordinatesJson = new JSONObject();
 
         View parentLayout = findViewById(android.R.id.content);
@@ -237,14 +244,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         textView.setTextColor(Color.WHITE);
         snk.setDuration(2000);
         snk.show();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            stopService(new Intent(this, GetCoordinates.class));
-            startService(new Intent(this, GetCoordinates.class));
-        } else {
-            stopService(new Intent(this, GetCoordinates.class));
-            startService(new Intent(this, GetCoordinates.class));
-        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -294,14 +293,11 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     }
 
     private void redrawLine(){
-        //mMap.clear();  //clears all Markers and Polylines
-
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
 
         try {
-            JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordsTracing", ""));
+            JSONObject jsonFromShared = new JSONObject(app.shaPref.getString("coordsTracing", null));
             coordinatesJson = jsonFromShared;
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -319,34 +315,22 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             }
         }
 
-        line = mMap.addPolyline(options);
+//        line = mMap.addPolyline(options);
+        mMap.addPolyline(options);
     }
 
     public void processCoordinates(double latitude, double longitude) {
         mMap.clear();
-
         LatLng latLng = new LatLng(latitude, longitude); //you already have this
-
         // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
-        LatLng prueba = new LatLng(7.944498, -72.503353);
-        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
-                .position(prueba, 600f, 900f);
-        mMap.addGroundOverlay(groundOverlayOptions);
+//        LatLng prueba = new LatLng(7.944498, -72.503353);
+//        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+//                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
+//                .position(prueba, 600f, 900f);
+//        mMap.addGroundOverlay(groundOverlayOptions);
         // END - Traido aquí para que la imagen del mapa añadido no se cambie
 
-        if(shaPref.getBoolean("allowRedrawLine", false)){
-//            try {
-//                String id = String.valueOf(coordinatesJson.length());
-//                coordinatesJson.put(id, latitude + ", " +longitude);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//
-//            String stringToShared = coordinatesJson.toString();
-//            editor.putString("coordsTracing", stringToShared);
-//            editor.commit();
-
+        if(app.shaPref.getBoolean("allowRedrawLine", false)){
             redrawLine();
         }
 

@@ -21,13 +21,15 @@ public class LineApplication extends Application {
     private ConnectivityManager connectivityManager;
     private boolean connected = false;
     public String dni, uid, email, company, position;
-    private SharedPreferences shaPref;
+    public SharedPreferences shaPref;
+    public SharedPreferences.Editor editor;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
+        editor = shaPref.edit();
 
         firebaseAuth = FirebaseAuth.getInstance();
         if (firebaseAuth.getCurrentUser() != null){

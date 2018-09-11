@@ -20,10 +20,11 @@
     <string name="title_history">History</string>
     <string name="title_logout">Logout</string>
 
-    Tracedcing-->
+    <!--Tracing-->
     <string name="title_view">View</string>
     <string name="message_successful_travel">Successful travel?</string>
     <string name="toast_successful_store">Successful upload!</string>
+    <string name="toast_not_store">Tracking removed</string>
 
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>

@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.markvac.line.LineApplication;
 import com.markvac.line.R;
 
 import org.json.JSONException;
@@ -31,17 +32,14 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
 
     public static final String ACTION_GET_COORDINATES = GetCoordinates.class.getName() + "Coordinates";
     private JSONObject coordinatesJson;
-    private SharedPreferences shaPref;
-    private SharedPreferences.Editor editor;
     private LocationManager mLocationManager;
+    private LineApplication app;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
-        editor = shaPref.edit();
-
+        app = (LineApplication) getApplicationContext();
         coordinatesJson = new JSONObject();
 
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -80,22 +78,29 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
 
-            if (shaPref.getBoolean("allowRedrawLine", false)){
+            if (app.shaPref.getBoolean("allowRedrawLine", false)){
                 try {
-                    if (shaPref.getString("coordsTracing", null) != null) {
-                        JSONObject jsonFromShared = new JSONObject(shaPref.getString("coordsTracing", ""));
+                    if (app.shaPref.getString("coordsTracing", null) != null) {
+                        JSONObject jsonFromShared = new JSONObject(app.shaPref.getString("coordsTracing", null));
                         coordinatesJson = jsonFromShared;
+                        String id = String.valueOf(coordinatesJson.length());
+                        coordinatesJson.put(id, latitude + ", " + longitude);
+                        String stringToShared = coordinatesJson.toString();
+                        app.editor.putString("coordsTracing", stringToShared);
+                        app.editor.commit();
+                    } else {
+                        coordinatesJson.put("0", latitude + ", " + longitude);
+                        String stringToShared = coordinatesJson.toString();
+                        app.editor.putString("coordsTracing", stringToShared);
+                        app.editor.commit();
                     }
-                    String id = String.valueOf(coordinatesJson.length());
-                    coordinatesJson.put(id, latitude + ", " + longitude);
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                String stringToShared = coordinatesJson.toString();
-                editor.putString("coordsTracing", stringToShared);
-                editor.commit();
+            } else {
+                app.editor.remove("coordsTracing");
+                app.editor.commit();
+                coordinatesJson = new JSONObject();
             }
 
             Intent intent = new Intent(ACTION_GET_COORDINATES);
@@ -123,5 +128,6 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.w("jjj", "Destroyed");
     }
 }

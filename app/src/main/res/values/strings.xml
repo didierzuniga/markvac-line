@@ -19,10 +19,11 @@
     <string name="title_history">Historiales</string>
     <string name="title_logout">Salir</string>
 
-    Tracedcing-->
+    <!--Tracing-->
     <string name="title_view">Vista</string>
     <string name="message_successful_travel">¿Recorrido exitoso?</string>
     <string name="toast_successful_store">¡Carga exitosa!</string>
+    <string name="toast_not_store">Seguimiento eliminado</string>
 
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>
