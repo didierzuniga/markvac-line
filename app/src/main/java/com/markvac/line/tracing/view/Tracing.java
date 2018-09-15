@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +20,7 @@ import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -28,10 +30,18 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,8 +78,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private GoogleMap mMap;
     private DotProgressBar dotProgressBar;
     private AlertDialog alert = null;
-//    private SharedPreferences shaPref;
+    //    private SharedPreferences shaPref;
 //    private SharedPreferences.Editor editor;
+    private android.app.AlertDialog alertDialog;
+    private Spinner spinnerTypeTracking;
+    private Spinner spinnerSubstance;
+    private LinearLayout linearSpinnerSubstance, linearSubstanceAmount;
+    private TextInputEditText amountSubstance;
+    private Button buttonAccept;
+    private Button buttonCancel;
+    private byte typeSelected;
+    private byte substanceSelected;
     private Polyline line;
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
@@ -109,7 +128,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             startService(new Intent(this, GetCoordinates.class));
         }
 
-        if (app.shaPref.getBoolean("allowRedrawLine", false)){
+        if (app.shaPref.getBoolean("allowRedrawLine", false)) {
             // If button was playing, change to Stop
             btnPlayStop.setImageResource(R.drawable.ic_stop);
         } else {
@@ -120,7 +139,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (app.shaPref.getBoolean("allowRedrawLine", false)){
+                if (app.shaPref.getBoolean("allowRedrawLine", false)) {
                     btnPlayStop.setImageResource(R.drawable.ic_play);
 
                     // Coloco 5 puntos minimo para guardar como recorrido
@@ -130,13 +149,15 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    if (coordinatesJson.length() > 2){
+                    if (coordinatesJson.length() > 2) {
                         confirmStoreCoordinates();
                     }
                 } else {
-                    btnPlayStop.setImageResource(R.drawable.ic_stop);
-                    app.editor.putBoolean("allowRedrawLine", true);
-                    app.editor.commit();
+                    // Agregar modal para preguntar tipo de recorrido
+                    selectTypeTracking();
+//                    btnPlayStop.setImageResource(R.drawable.ic_stop);
+//                    app.editor.putBoolean("allowRedrawLine", true);
+//                    app.editor.commit();
                 }
             }
         });
@@ -178,7 +199,119 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         btnPlayStop.setEnabled(true);
     }
 
-    public void confirmStoreCoordinates(){
+    public void selectTypeTracking() {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View view = layoutInflater.inflate(R.layout.dialog_choose_type_tracking, null);
+        alertDialog = new android.app.AlertDialog.Builder(this).create();
+
+        linearSpinnerSubstance = view.findViewById(R.id.idLinearSpinnerSubstance);
+        linearSubstanceAmount = view.findViewById(R.id.idLinearSubstanceAmount);
+        spinnerTypeTracking = view.findViewById(R.id.idSpinnerTypeTracking);
+        spinnerSubstance = view.findViewById(R.id.idSpinnerSubstance);
+        amountSubstance = view.findViewById(R.id.idSubstanceAmount);
+        buttonAccept = view.findViewById(R.id.idButtonAccept);
+        buttonCancel = view.findViewById(R.id.idButtonCancel);
+        amountSubstance.addTextChangedListener(filterAmount);
+
+        spinnerTypeTracking.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                typeSelected = (byte) spinnerTypeTracking.getSelectedItemId();
+                if (typeSelected != 0) {
+                    buttonAccept.setEnabled(false);
+                    linearSpinnerSubstance.setVisibility(View.VISIBLE);
+                    linearSubstanceAmount.setVisibility(View.VISIBLE);
+
+                    spinnerSubstance.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            substanceSelected = (byte) spinnerSubstance.getSelectedItemId();
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+
+                } else {
+                    buttonAccept.setEnabled(true);
+                    linearSpinnerSubstance.setVisibility(View.GONE);
+                    linearSubstanceAmount.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        buttonAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (typeSelected == 0) {
+                    app.editor.putString("typeTracking", "tr_superv");
+                    app.editor.commit();
+                } else {
+                    String substanceName = "";
+                    if (substanceSelected == 0) {
+                        substanceName = "A1";
+                    } else if (substanceSelected == 1) {
+                        substanceName = "A5";
+                    } else if (substanceSelected == 2) {
+                        substanceName = "C4";
+                    }
+
+                    app.editor.putString("typeTracking", "tr_irriga");
+                    app.editor.putString("substanceToApply", substanceName);
+                    app.editor.putString("amountSubstance", amountSubstance.getText().toString());
+                    app.editor.commit();
+                    btnPlayStop.setImageResource(R.drawable.ic_stop);
+                    app.editor.putBoolean("allowRedrawLine", true);
+                    app.editor.commit();
+                }
+                alertDialog.dismiss();
+            }
+        });
+
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.setView(view);
+        alertDialog.show();
+    }
+
+    private TextWatcher filterAmount = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            if (s != null || s != ""){
+                buttonAccept.setEnabled(true);
+            } else {
+                buttonAccept.setEnabled(false);
+            }
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (s.length() > 0){
+                buttonAccept.setEnabled(true);
+            } else {
+                buttonAccept.setEnabled(false);
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    public void confirmStoreCoordinates() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.message_successful_travel)
                 .setCancelable(false)
@@ -271,7 +404,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         finish();
     }
 
-    public void goLogout(){
+    public void goLogout() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             stopService(new Intent(this, GetCoordinates.class));
         } else {
@@ -292,7 +425,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         mMap.getUiSettings().setAllGesturesEnabled(true);
     }
 
-    private void redrawLine(){
+    private void redrawLine() {
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
 
         try {
@@ -330,7 +463,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 //        mMap.addGroundOverlay(groundOverlayOptions);
         // END - Traido aquí para que la imagen del mapa añadido no se cambie
 
-        if(app.shaPref.getBoolean("allowRedrawLine", false)){
+        if (app.shaPref.getBoolean("allowRedrawLine", false)) {
             redrawLine();
         }
 

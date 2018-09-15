@@ -25,6 +25,28 @@
     <string name="toast_successful_store">¡Carga exitosa!</string>
     <string name="toast_not_store">Seguimiento eliminado</string>
 
+    <string name="spinner_type_tracking">Tipo de seguimiento</string>
+    <string-array name="options_type">
+        <item>Supervisión</item>
+        <item>Riego con tractor</item>
+        <item>Riego manual</item>
+    </string-array>
+
+    <string name="spinner_substance">Sustancia a aplicar</string>
+    <string-array name="options_substance">
+        <item>A1</item>
+        <item>A5</item>
+        <item>C4</item>
+    </string-array>
+
+    <string name="text_task">Tarea</string>
+    <string name="text_substance_to_apply">Sustancia a aplicar</string>
+    <string name="hint_amount_substance">Cantidad</string>
+    <string name="text_gallons">Galones</string>
+    <string name="button_done">Listo</string>
+    <string name="button_cancel">Cancelar</string>
+
+
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

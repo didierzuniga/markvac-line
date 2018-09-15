@@ -7,6 +7,7 @@ package com.markvac.line.models;
 public class Traced {
     public int distance;
     public int duration;
+    public double gallons;
     public String points;
 
     public Traced() {
@@ -32,6 +33,14 @@ public class Traced {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public double getGallons() {
+        return gallons;
+    }
+
+    public void setGallons(double gallons) {
+        this.gallons = gallons;
     }
 
     public String getPoints() {

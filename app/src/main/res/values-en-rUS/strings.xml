@@ -26,6 +26,27 @@
     <string name="toast_successful_store">Successful upload!</string>
     <string name="toast_not_store">Tracking removed</string>
 
+    <string name="spinner_type_tracking">Type of tracking</string>
+    <string-array name="options_type">
+        <item>Supervision</item>
+        <item>Irrigation with tractor</item>
+        <item>Manual irrigation</item>
+    </string-array>
+
+    <string name="spinner_substance">substance to apply</string>
+    <string-array name="options_substance">
+        <item>A1</item>
+        <item>A5</item>
+        <item>C4</item>
+    </string-array>
+
+    <string name="text_task">Task</string>
+    <string name="text_substance_to_apply">Substance to apply</string>
+    <string name="hint_amount_substance">Amount</string>
+    <string name="text_gallons">Gallons</string>
+    <string name="button_done">Done</string>
+    <string name="button_cancel">Cancel</string>
+
     <!--DRAWER NAVIGATION-->
     <string name="title_activity_home"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
