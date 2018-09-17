@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.interactor.TracingInteractorImpl;
+import com.markvac.line.tracing.view.Tracing;
 import com.markvac.line.tracing.view.TracingView;
 
 /**
@@ -19,9 +20,11 @@ public class TracingPresenterImpl implements TracingPresenter {
         interactor = new TracingInteractorImpl(this);
     }
 
+
     @Override
-    public void saveCoordinates(String coordinates, String dni, String company) {
-        interactor.saveCoordinates(coordinates, dni, company);
+    public void saveCoordinates(String company, String typeTracking, String dni, String coordinates,
+                                String typeSubstance, String amountSubstance, Tracing tracing) {
+        interactor.saveCoordinates(company, typeTracking, dni, coordinates, typeSubstance, amountSubstance, tracing);
     }
 
     @Override

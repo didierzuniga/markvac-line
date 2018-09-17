@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -40,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -66,6 +68,7 @@ import com.markvac.line.services.GetCoordinates;
 import com.markvac.line.tracing.presenter.TracingPresenter;
 import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -78,8 +81,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private GoogleMap mMap;
     private DotProgressBar dotProgressBar;
     private AlertDialog alert = null;
-    //    private SharedPreferences shaPref;
-//    private SharedPreferences.Editor editor;
     private android.app.AlertDialog alertDialog;
     private Spinner spinnerTypeTracking;
     private Spinner spinnerSubstance;
@@ -87,12 +88,15 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private TextInputEditText amountSubstance;
     private Button buttonAccept;
     private Button buttonCancel;
+    private ImageView imageStoreDevice;
+    private ImageView imageStoreDb;
     private byte typeSelected;
     private byte substanceSelected;
     private Polyline line;
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
     private FloatingActionButton btnPlayStop;
+    private FloatingActionButton btnNotification;
     private LineApplication app;
     private TracingPresenter presenter;
 
@@ -107,20 +111,23 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         presenter = new TracingPresenterImpl(this);
         app = (LineApplication) getApplicationContext();
 
+        imageStoreDevice = findViewById(R.id.idImageStoreDevice);
         dotProgressBar = findViewById(R.id.idDotProgress);
         coordinatesJson = new JSONObject();
-
-//        shaPref = getSharedPreferences("sharedMarkvacLine", MODE_PRIVATE);
-//        editor = shaPref.edit();
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        btnPlayStop = findViewById(R.id.fabPlayStop);
-        int miColor = getResources().getColor(R.color.colorWhite);
-        ColorStateList csl = new ColorStateList(new int[][]{new int[0]}, new int[]{miColor});
-        btnPlayStop.setBackgroundTintList(csl);
+        btnPlayStop = findViewById(R.id.idFabPlayStop);
+        int colorPlayStop = getResources().getColor(R.color.colorWhite);
+        ColorStateList csl1 = new ColorStateList(new int[][]{new int[0]}, new int[]{colorPlayStop});
+        btnPlayStop.setBackgroundTintList(csl1);
+
+        btnNotification = findViewById(R.id.idFabNotification);
+        int colorNotification = getResources().getColor(R.color.colorRed);
+        ColorStateList csl2 = new ColorStateList(new int[][]{new int[0]}, new int[]{colorNotification});
+        btnNotification.setBackgroundTintList(csl2);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             startService(new Intent(this, GetCoordinates.class));
@@ -151,13 +158,14 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     }
                     if (coordinatesJson.length() > 2) {
                         confirmStoreCoordinates();
+                    } else {
+                        app.editor.putBoolean("allowRedrawLine", false);
+                        app.editor.remove("coordsTracing");
+                        app.editor.commit();
+                        coordinatesJson = new JSONObject();
                     }
                 } else {
-                    // Agregar modal para preguntar tipo de recorrido
                     selectTypeTracking();
-//                    btnPlayStop.setImageResource(R.drawable.ic_stop);
-//                    app.editor.putBoolean("allowRedrawLine", true);
-//                    app.editor.commit();
                 }
             }
         });
@@ -189,6 +197,24 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     public void hideProgressBar() {
         dotProgressBar.setVisibility(View.GONE);
+    }
+
+    public void showImageStoreDevice() {
+        imageStoreDevice.setVisibility(View.VISIBLE);
+        imageStoreDevice.animate().rotationY(360).setDuration(1600);
+    }
+
+    public void hideImageStoreDevice() {
+        imageStoreDevice.animate().rotationY(0);
+        imageStoreDevice.setVisibility(View.GONE);
+    }
+
+    public void showFabNotification() {
+        btnNotification.setVisibility(View.VISIBLE);
+    }
+
+    public void hideFabNotification() {
+        btnNotification.setVisibility(View.GONE);
     }
 
     public void disableButtons() {
@@ -267,10 +293,10 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     app.editor.putString("substanceToApply", substanceName);
                     app.editor.putString("amountSubstance", amountSubstance.getText().toString());
                     app.editor.commit();
-                    btnPlayStop.setImageResource(R.drawable.ic_stop);
-                    app.editor.putBoolean("allowRedrawLine", true);
-                    app.editor.commit();
                 }
+                btnPlayStop.setImageResource(R.drawable.ic_stop);
+                app.editor.putBoolean("allowRedrawLine", true);
+                app.editor.commit();
                 alertDialog.dismiss();
             }
         });
@@ -334,7 +360,20 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                         });
 
                         String coordinates = app.shaPref.getString("coordsTracing", null);
-                        presenter.saveCoordinates(coordinates, app.dni, app.company);
+
+                        String typeTrack = app.shaPref.getString("typeTracking", null);
+                        if (typeTrack == "tr_superv"){
+                            String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, coordinates,
+                                                        null, null, Tracing.this);
+                        } else {
+                            String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
+                            String typeSubstance = app.shaPref.getString("substanceToApply", "FallaShared");
+                            String amountSubstance = app.shaPref.getString("amountSubstance", "FallaShared");
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, coordinates,
+                                                        typeSubstance, amountSubstance, Tracing.this);
+                        }
+
                     }
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override
@@ -367,16 +406,33 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         app.editor.commit();
         coordinatesJson = new JSONObject();
 
-        View parentLayout = findViewById(android.R.id.content);
-        Snackbar snk = Snackbar.make(parentLayout, getString(R.string.toast_successful_store),
-                Snackbar.LENGTH_SHORT);
-        View snackBarView = snk.getView();
-        snackBarView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        TextView textView = snackBarView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_text));
-        textView.setTextColor(Color.WHITE);
-        snk.setDuration(2000);
-        snk.show();
+        showImageStoreDevice();
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        hideImageStoreDevice();
+                    }
+                }, 3000);
+            }
+        });
+
+        try {
+            JSONArray jsonArrayFromShared = new JSONArray(app.shaPref.getString("registerReadyToDB", null));
+            if (jsonArrayFromShared.length() > 0){
+                showFabNotification();
+            } else {
+                hideFabNotification();
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -477,6 +533,16 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (app.shaPref.getString("registerReadyToDB", null) != null){
+            showFabNotification();
+        } else {
+            hideFabNotification();
+        }
     }
 
     @Override

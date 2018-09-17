@@ -4,16 +4,15 @@ package com.markvac.line.models;
  * Created by unicorn on 9/1/2018.
  */
 
-public class Traced {
+public class TrackingSupervision {
     public int distance;
     public int duration;
-    public double gallons;
     public String points;
 
-    public Traced() {
+    public TrackingSupervision() {
     }
 
-    public Traced(int distance, int duration, String points) {
+    public TrackingSupervision(int distance, int duration, String points) {
         this.distance = distance;
         this.duration = duration;
         this.points = points;
@@ -33,14 +32,6 @@ public class Traced {
 
     public void setDuration(int duration) {
         this.duration = duration;
-    }
-
-    public double getGallons() {
-        return gallons;
-    }
-
-    public void setGallons(double gallons) {
-        this.gallons = gallons;
     }
 
     public String getPoints() {

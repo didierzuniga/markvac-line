@@ -1,23 +1,14 @@
 package com.markvac.line.tracing.repository;
 
-import android.util.Log;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.markvac.line.apis.RetrofitDatetimeAdapter;
 import com.markvac.line.apis.RetrofitDatetimeService;
 import com.markvac.line.models.Time;
-import com.markvac.line.models.Traced;
-import com.markvac.line.models.User;
+import com.markvac.line.models.TrackingSupervision;
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.presenter.TracingPresenter;
-import com.markvac.line.tracing.presenter.TracingPresenterImpl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -84,7 +75,7 @@ public class TracingRepositoryImpl implements TracingRepository {
         public void run() {
             if (timeNow != null || dateNow != null){
                 String path = companyName + "/tracing/" + dni + "/" + dateNow + "/" + timeNow;
-                Traced traced = new Traced(distan, durat, coords);
+                TrackingSupervision traced = new TrackingSupervision(distan, durat, coords);
                 referenceCompanies.child(path).setValue(traced);
                 timer.cancel();
                 presenter.successfulStore();

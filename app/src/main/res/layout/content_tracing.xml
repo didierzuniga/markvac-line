@@ -29,9 +29,36 @@
         android:layout_height="50dp"
         android:layout_marginTop="300dp"
         android:visibility="gone"/>
+    
+    <ImageView
+        android:id="@+id/idImageStoreDevice"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="250dp"
+        android:src="@drawable/img_store_device"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/idImageStoreDb"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:layout_marginTop="250dp"
+        android:src="@drawable/img_store_db"
+        android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabPlayStop"
+        android:id="@+id/idFabNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabSize="normal"
+        android:clickable="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/idFabPlayStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
