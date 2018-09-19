@@ -50,7 +50,7 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
             mLocationManager.addGpsStatusListener(this);
             mLocationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    5000,
+                    10000,
                     0,
                     this);
         }
@@ -75,6 +75,7 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
+            coordinatesJson = new JSONObject();
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
 
@@ -98,9 +99,9 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
                     e.printStackTrace();
                 }
             } else {
-                app.editor.remove("coordsTracing");
+                // Estas dos lineas quizás se podrían borrar y así omitir el "Else"
+                app.editor.putString("coordsTracing", null);
                 app.editor.commit();
-                coordinatesJson = new JSONObject();
             }
 
             Intent intent = new Intent(ACTION_GET_COORDINATES);

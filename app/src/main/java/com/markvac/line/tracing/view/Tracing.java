@@ -148,10 +148,12 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             public void onClick(View v) {
                 if (app.shaPref.getBoolean("allowRedrawLine", false)) {
                     btnPlayStop.setImageResource(R.drawable.ic_play);
+                    app.editor.putBoolean("allowRedrawLine", false);
+                    app.editor.commit();
 
                     // Coloco 5 puntos minimo para guardar como recorrido
                     try {
-                        JSONObject jsonFromShared = new JSONObject(app.shaPref.getString("coordsTracing", ""));
+                        JSONObject jsonFromShared = new JSONObject(app.shaPref.getString("coordsTracing", null));
                         coordinatesJson = jsonFromShared;
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -159,8 +161,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     if (coordinatesJson.length() > 2) {
                         confirmStoreCoordinates();
                     } else {
-                        app.editor.putBoolean("allowRedrawLine", false);
-                        app.editor.remove("coordsTracing");
+                        app.editor.putString("coordsTracing", null);
                         app.editor.commit();
                         coordinatesJson = new JSONObject();
                     }
@@ -346,8 +347,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     public void onClick(DialogInterface dialog, int which) {
                         // Response YES
                         //Antes de almacenar en DB calcular distancia y tiempo y fecha
-                        app.editor.putBoolean("allowRedrawLine", false);
-                        app.editor.commit();
                         View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
                         v.setAlpha(0.5f); // Change this value to set the desired alpha
 
@@ -378,8 +377,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 }).setNegativeButton(R.string.message_no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                app.editor.putBoolean("allowRedrawLine", false);
-                app.editor.remove("coordsTracing");
+                app.editor.putString("coordsTracing", null);
                 app.editor.commit();
                 coordinatesJson = new JSONObject();
                 Toast.makeText(Tracing.this, getResources().getString(R.string.toast_not_store), Toast.LENGTH_SHORT).show();
@@ -391,6 +389,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     @Override
     public void successfulStore() {
+        processCoordinates(0, 0);
+
         View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
         v.setAlpha(1.0f); // Change this value to set the desired alpha
 
@@ -402,8 +402,9 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             }
         });
 
-        app.editor.remove("coordsTracing");
+        app.editor.putString("coordsTracing", null);
         app.editor.commit();
+
         coordinatesJson = new JSONObject();
 
         showImageStoreDevice();
@@ -510,24 +511,29 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     public void processCoordinates(double latitude, double longitude) {
         mMap.clear();
-        LatLng latLng = new LatLng(latitude, longitude); //you already have this
-        // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
+        if (latitude != 0 && longitude != 0){
+            LatLng latLng = new LatLng(latitude, longitude); //you already have this
+            // BEGIN - Traido aquí para que la imagen del mapa añadido no se cambie
 //        LatLng prueba = new LatLng(7.944498, -72.503353);
 //        GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
 //                .image(BitmapDescriptorFactory.fromResource(R.drawable.queen))
 //                .position(prueba, 600f, 900f);
 //        mMap.addGroundOverlay(groundOverlayOptions);
-        // END - Traido aquí para que la imagen del mapa añadido no se cambie
+            // END - Traido aquí para que la imagen del mapa añadido no se cambie
 
-        if (app.shaPref.getBoolean("allowRedrawLine", false)) {
-            redrawLine();
+            if (app.shaPref.getBoolean("allowRedrawLine", false)) {
+                redrawLine();
+            }
+
+            MarkerOptions mp = new MarkerOptions();
+            mp.position(latLng);
+            mMap.addMarker(mp);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            mMap.animateCamera(cameraUpdate);
+        } else {
+            app.editor.putString("coordsTracing", null);
+            app.editor.commit();
         }
-
-        MarkerOptions mp = new MarkerOptions();
-        mp.position(latLng);
-        mMap.addMarker(mp);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-        mMap.animateCamera(cameraUpdate);
     }
 
     @Override
