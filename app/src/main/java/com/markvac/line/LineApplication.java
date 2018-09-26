@@ -19,7 +19,6 @@ public class LineApplication extends Application {
     public FirebaseUser firebaseUser;
     private FirebaseAuth firebaseAuth;
     private ConnectivityManager connectivityManager;
-    private boolean connected = false;
     public String dni, uid, email, company, position;
     public SharedPreferences shaPref;
     public SharedPreferences.Editor editor;
@@ -45,6 +44,7 @@ public class LineApplication extends Application {
     }
 
     public boolean isOnline() {
+        boolean connected = false;
         try {
             connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 

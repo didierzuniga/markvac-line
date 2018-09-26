@@ -11,4 +11,5 @@ public interface TracingPresenter {
     void saveCoordinates(String company, String typeTracking, String dni, String coordinates,
                          String typeSubstance, String amountSubstance, Tracing tracing);
     void successfulStore();
+    void uploadData();
 }

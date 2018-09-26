@@ -60,6 +60,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.gson.Gson;
 import com.markvac.line.LineApplication;
 import com.markvac.line.R;
 import com.markvac.line.customizer.History;
@@ -72,6 +73,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
@@ -128,6 +130,18 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         int colorNotification = getResources().getColor(R.color.colorRed);
         ColorStateList csl2 = new ColorStateList(new int[][]{new int[0]}, new int[]{colorNotification});
         btnNotification.setBackgroundTintList(csl2);
+        btnNotification.setImageResource(R.drawable.ic_upload);
+
+        btnNotification.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (app.isOnline()){
+//                    presenter.uploadData();
+                } else {
+                    Toast.makeText(Tracing.this, getResources().getString(R.string.toast_not_internet), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             startService(new Intent(this, GetCoordinates.class));

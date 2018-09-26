@@ -10,4 +10,5 @@ public interface TracingInteractor {
 //    void saveCoordinates(String coordinates, String dni, String company);
     void saveCoordinates(String company, String typeTracking, String dni, String coordinates,
                          String typeSubstance, String amountSubstance, Activity activity);
+    void uploadData();
 }

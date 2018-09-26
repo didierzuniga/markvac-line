@@ -24,6 +24,7 @@
     <string name="message_successful_travel">¿Recorrido exitoso?</string>
     <string name="toast_successful_store">¡Carga exitosa!</string>
     <string name="toast_not_store">Seguimiento eliminado</string>
+    <string name="toast_not_internet">No hay conexión a Internet</string>
 
     <string name="spinner_type_tracking">Tipo de seguimiento</string>
     <string-array name="options_type">

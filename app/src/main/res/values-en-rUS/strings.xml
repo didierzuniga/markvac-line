@@ -25,6 +25,7 @@
     <string name="message_successful_travel">Successful travel?</string>
     <string name="toast_successful_store">Successful upload!</string>
     <string name="toast_not_store">Tracking removed</string>
+    <string name="toast_not_internet">Not internet connection</string>
 
     <string name="spinner_type_tracking">Type of tracking</string>
     <string-array name="options_type">

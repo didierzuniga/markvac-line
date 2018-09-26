@@ -31,4 +31,9 @@ public class TracingPresenterImpl implements TracingPresenter {
     public void successfulStore() {
         view.successfulStore();
     }
+
+    @Override
+    public void uploadData() {
+        interactor.uploadData();
+    }
 }
