@@ -1,13 +1,20 @@
 package com.markvac.line.tracing.repository;
 
+import android.app.Activity;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.markvac.line.LineApplication;
 import com.markvac.line.apis.RetrofitDatetimeAdapter;
 import com.markvac.line.apis.RetrofitDatetimeService;
 import com.markvac.line.models.Time;
 import com.markvac.line.models.TrackingSupervision;
 import com.markvac.line.tracing.interactor.TracingInteractor;
 import com.markvac.line.tracing.presenter.TracingPresenter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,9 +32,10 @@ public class TracingRepositoryImpl implements TracingRepository {
 
     private TracingPresenter presenter;
     private TracingInteractor interactor;
-
+    private LineApplication app;
+    private JSONArray uploadToDB;
     private Timer timer;
-    private String coords, dateNow, timeNow, dni, companyName;
+    private String dateNow, timeNow, dni, companyName;
     private int durat, distan;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -40,12 +48,10 @@ public class TracingRepositoryImpl implements TracingRepository {
     }
 
     @Override
-    public void saveCoordinates(String coordinates, int duration, int distance, String userId, String company) {
-        coords = coordinates;
-        durat = duration;
-        distan = distance;
-        dni = userId;
+    public void uploadData(JSONArray upload, String company, String dnii) {
+        dni = dnii;
         companyName = company;
+        uploadToDB = upload;
         //DATETIME
         Retrofit retrofit = new RetrofitDatetimeAdapter().getAdapter();
         RetrofitDatetimeService service = retrofit.create(RetrofitDatetimeService.class);
@@ -74,13 +80,34 @@ public class TracingRepositoryImpl implements TracingRepository {
         @Override
         public void run() {
             if (timeNow != null || dateNow != null){
-                String path = companyName + "/tracing/" + dni + "/" + dateNow + "/" + timeNow;
-                TrackingSupervision traced = new TrackingSupervision(distan, durat, coords);
-                referenceCompanies.child(path).setValue(traced);
-                timer.cancel();
-                presenter.successfulStore();
-                dateNow = null;
-                timeNow = null;
+
+                try {
+                    for (int i = 0; i < uploadToDB.length(); i++){
+                        String typeSubstanc = null;
+                        String amountSubstanc = null;
+                        String data = (uploadToDB.get(i)).toString(); // {"typeTrack":"tr_irriga","coordinates":"{\","typeSubstance":"A1","amountSubstance":"15"}
+                        JSONObject jsonObjectForKey = new JSONObject(data); // Lo mismo del anterior pero en Object
+                        String typeTrack = jsonObjectForKey.getString("typeTrack");
+                        String coords = jsonObjectForKey.getString("coordinates");
+                        int distance = jsonObjectForKey.getInt("distance");
+                        typeSubstanc = jsonObjectForKey.getString("typeSubstance");
+                        amountSubstanc = jsonObjectForKey.getString("amountSubstance");
+
+
+                        String path = companyName + "/" + typeTrack + "/" + dni + "/" + dateNow + "/" + timeNow;
+                        TrackingSupervision traced = new TrackingSupervision(distance, 1, coords, typeSubstanc, amountSubstanc);
+                        referenceCompanies.child(path).setValue(traced);
+
+                    }
+
+                    timer.cancel();
+                    presenter.successfulUpload();
+                    dateNow = null;
+                    timeNow = null;
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

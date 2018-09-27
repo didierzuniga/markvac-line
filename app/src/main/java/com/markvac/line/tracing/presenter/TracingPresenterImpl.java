@@ -33,7 +33,13 @@ public class TracingPresenterImpl implements TracingPresenter {
     }
 
     @Override
-    public void uploadData() {
-        interactor.uploadData();
+    public void successfulUpload() {
+        view.successfulUpload();
     }
+
+    @Override
+    public void uploadData(String company, String dni, Tracing tracing) {
+        interactor.uploadData(company, dni, tracing);
+    }
+
 }

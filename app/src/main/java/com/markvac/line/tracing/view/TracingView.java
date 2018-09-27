@@ -6,4 +6,5 @@ package com.markvac.line.tracing.view;
 
 public interface TracingView {
     void successfulStore();
+    void successfulUpload();
 }

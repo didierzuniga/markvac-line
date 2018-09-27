@@ -32,8 +32,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
     private JSONArray jsonArrayFromShared, jsonArrayToUpload;
     private String userId, companyName;
     private int counterMainArray, counterChildCoords, distance, duration;
-    private SharedPreferences shaPref;
-    private SharedPreferences.Editor editor;
     private LineApplication app;
     private TracingPresenter presenter;
     private TracingRepository repository;
@@ -48,23 +46,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
                                 String typeSubstance, String amountSubstance, Activity activity) {
 
         app = (LineApplication) activity.getApplicationContext();
-        userId = dni;
-        companyName = company;
-//        typeTrack = typeTracking;
-//        typeSubstan = typeSubstance;
-//        amountSubstan = amountSubstance;
-
-        // Almacenar datos en Preferences
-
-        //Company
-        //Type tracking
-        //Dni
-        //Distance
-        //Duration
-        //Coordinates
-        //Type substance (if exist)
-        //Amount substance (if exist)
-
         JSONObject dataJson = new JSONObject();
         JSONArray registerJson = new JSONArray();
 
@@ -105,7 +86,10 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
     }
 
     @Override
-    public void uploadData() {
+    public void uploadData(String company, String dni, Activity activity) {
+        app = (LineApplication) activity.getApplicationContext();
+        userId = dni;
+        companyName = company;
         counterMainArray = 0;
         jsonArrayToUpload = new JSONArray();
         try {
@@ -132,7 +116,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
                 }
             }
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -147,7 +130,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 //        calculateDistanceAndTime(coordinates);
 //    }
 
-    public void calculateDistanceAndTime(String coordinates) {
+//    public void calculateDistanceAndTime(String coordinates) {
 //        try {
 //            JSONObject jsonFromShared = new JSONObject(coordinates);
 //            coordinatesJson = jsonFromShared;
@@ -169,7 +152,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 //                e.printStackTrace();
 //            }
 //        }
-    }
+//    }
 
     @Override
     public void onDirectionFinderStart() {
@@ -188,7 +171,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
             // Aqui terminan las coordenadas de cada Key del Array principal
 
             counterMainArray += 1;
-
             try {
                 jsonObjectForKey.put("distance", distance);
                 jsonArrayToUpload.put(jsonObjectForKey);
@@ -197,11 +179,8 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
             }
 
             if (counterMainArray == jsonArrayFromShared.length()) {
-                // guardar datos
-                // repository.saveCoordinates(coords, duration, distance, userId, companyName);
+                repository.uploadData(jsonArrayToUpload, companyName, userId);
             }
         }
-
-
     }
 }

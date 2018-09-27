@@ -136,7 +136,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             @Override
             public void onClick(View v) {
                 if (app.isOnline()){
-//                    presenter.uploadData();
+                    // Agregar UI y UX
+                    presenter.uploadData(app.company, app.dni, Tracing.this);
                 } else {
                     Toast.makeText(Tracing.this, getResources().getString(R.string.toast_not_internet), Toast.LENGTH_SHORT).show();
                 }
@@ -448,6 +449,11 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void successfulUpload() {
+        // Agregar UI y UX
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
