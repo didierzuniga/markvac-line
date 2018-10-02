@@ -73,7 +73,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 public class Tracing extends AppCompatActivity implements TracingView, NavigationView.OnNavigationItemSelectedListener,
@@ -97,8 +100,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
     private Polyline line;
     private SupportMapFragment mapFragment;
     private JSONObject coordinatesJson;
-    private FloatingActionButton btnPlayStop;
-    private FloatingActionButton btnNotification;
+    private FloatingActionButton btnPlayStop, btnNotification;
     private LineApplication app;
     private TracingPresenter presenter;
 
@@ -114,6 +116,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         app = (LineApplication) getApplicationContext();
 
         imageStoreDevice = findViewById(R.id.idImageStoreDevice);
+        imageStoreDb = findViewById(R.id.idImageStoreDb);
         dotProgressBar = findViewById(R.id.idDotProgress);
         coordinatesJson = new JSONObject();
 
@@ -136,7 +139,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
             @Override
             public void onClick(View v) {
                 if (app.isOnline()){
-                    // Agregar UI y UX
+                    v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+                    v.setAlpha(0.5f); // Change this value to set the desired alpha
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showProgressBar();
+                            disableButtons();
+                        }
+                    });
+
                     presenter.uploadData(app.company, app.dni, Tracing.this);
                 } else {
                     Toast.makeText(Tracing.this, getResources().getString(R.string.toast_not_internet), Toast.LENGTH_SHORT).show();
@@ -225,6 +238,16 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         imageStoreDevice.setVisibility(View.GONE);
     }
 
+    public void showImageStoreCloud() {
+        imageStoreDb.setVisibility(View.VISIBLE);
+        imageStoreDb.animate().rotationY(360).setDuration(1600);
+    }
+
+    public void hideImageStoreCloud() {
+        imageStoreDb.animate().rotationY(0);
+        imageStoreDb.setVisibility(View.GONE);
+    }
+
     public void showFabNotification() {
         btnNotification.setVisibility(View.VISIBLE);
     }
@@ -292,9 +315,14 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         buttonAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /// For Show Date
+                long dat = System.currentTimeMillis();
+                SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat time = new SimpleDateFormat("kk:mm:ss");
+                app.editor.putString("date", date.format(dat));
+                app.editor.putString("time", time.format(dat));
                 if (typeSelected == 0) {
                     app.editor.putString("typeTracking", "tr_superv");
-                    app.editor.commit();
                 } else {
                     String substanceName = "";
                     if (substanceSelected == 0) {
@@ -304,11 +332,9 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     } else if (substanceSelected == 2) {
                         substanceName = "C4";
                     }
-
                     app.editor.putString("typeTracking", "tr_irriga");
                     app.editor.putString("substanceToApply", substanceName);
                     app.editor.putString("amountSubstance", amountSubstance.getText().toString());
-                    app.editor.commit();
                 }
                 btnPlayStop.setImageResource(R.drawable.ic_stop);
                 app.editor.putBoolean("allowRedrawLine", true);
@@ -360,8 +386,6 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 .setPositiveButton(R.string.message_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // Response YES
-                        //Antes de almacenar en DB calcular distancia y tiempo y fecha
                         View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
                         v.setAlpha(0.5f); // Change this value to set the desired alpha
 
@@ -375,17 +399,17 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
                         String coordinates = app.shaPref.getString("coordsTracing", null);
 
-                        String typeTrack = app.shaPref.getString("typeTracking", null);
-                        if (typeTrack == "tr_superv"){
-                            String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
-                            presenter.saveCoordinates(app.company, typeTracking, app.dni, coordinates,
-                                                        null, null, Tracing.this);
+                        String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
+                        String date = app.shaPref.getString("date", "FallaShared");
+                        String time = app.shaPref.getString("time", "FallaShared");
+                        if (typeTracking == "tr_superv"){
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, date, time,
+                                                      coordinates,"none", "none", Tracing.this);
                         } else {
-                            String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
                             String typeSubstance = app.shaPref.getString("substanceToApply", "FallaShared");
                             String amountSubstance = app.shaPref.getString("amountSubstance", "FallaShared");
-                            presenter.saveCoordinates(app.company, typeTracking, app.dni, coordinates,
-                                                        typeSubstance, amountSubstance, Tracing.this);
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, date, time,
+                                                      coordinates, typeSubstance, amountSubstance, Tracing.this);
                         }
 
                     }
@@ -453,7 +477,36 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
 
     @Override
     public void successfulUpload() {
-        // Agregar UI y UX
+        app.editor.putString("registerReadyToDB", null);
+        app.editor.putString("registerUploadToDB", null);
+        app.editor.commit();
+
+        View v = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+        v.setAlpha(1.0f); // Change this value to set the desired alpha
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideFabNotification();
+                hideProgressBar();
+                enableButtons();
+            }
+        });
+
+        showImageStoreCloud();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        hideImageStoreCloud();
+                    }
+                }, 3000);
+            }
+        });
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

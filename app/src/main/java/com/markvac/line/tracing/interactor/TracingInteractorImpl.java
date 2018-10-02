@@ -2,6 +2,7 @@ package com.markvac.line.tracing.interactor;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -20,6 +21,8 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by unicorn on 8/22/2018.
@@ -27,11 +30,11 @@ import java.util.List;
 
 public class TracingInteractorImpl implements TracingInteractor, DirectionFinderListener {
 
-//    private JSONObject coordinatesJson;
     private JSONObject jsonCurrentCoordinates, jsonObjectForKey;
     private JSONArray jsonArrayFromShared, jsonArrayToUpload;
     private String userId, companyName;
-    private int counterMainArray, counterChildCoords, distance, duration;
+    private int counterMainArray, counterChildCoords, counterInTimer, distance, duration, counterI = 0, counterJ, j;
+    private Thread thre1, thre2;
     private LineApplication app;
     private TracingPresenter presenter;
     private TracingRepository repository;
@@ -42,7 +45,7 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
     }
 
     @Override
-    public void saveCoordinates(String company, String typeTracking, String dni, String coordinates,
+    public void saveCoordinates(String company, String typeTracking, String dni, String date, String time, String coordinates,
                                 String typeSubstance, String amountSubstance, Activity activity) {
 
         app = (LineApplication) activity.getApplicationContext();
@@ -53,6 +56,8 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
             if (app.shaPref.getString("registerReadyToDB", null) != null) {
                 JSONArray jsonArrayFromShared = new JSONArray(app.shaPref.getString("registerReadyToDB", null));
                 dataJson.put("typeTrack", typeTracking);
+                dataJson.put("date", date);
+                dataJson.put("time", time);
                 dataJson.put("coordinates", coordinates);
                 dataJson.put("typeSubstance", typeSubstance);
                 dataJson.put("amountSubstance", amountSubstance);
@@ -66,6 +71,8 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 
             } else {
                 dataJson.put("typeTrack", typeTracking);
+                dataJson.put("date", date);
+                dataJson.put("time", time);
                 dataJson.put("coordinates", coordinates);
                 dataJson.put("typeSubstance", typeSubstance);
                 dataJson.put("amountSubstance", amountSubstance);
@@ -81,8 +88,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-//        calculateDistanceAndTime(coordinates);
     }
 
     @Override
@@ -94,65 +99,53 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
         jsonArrayToUpload = new JSONArray();
         try {
             jsonArrayFromShared = new JSONArray(app.shaPref.getString("registerReadyToDB", null));
-
-            for (int i = 0; i < (jsonArrayFromShared.length()); i++) {
-                counterChildCoords = 0;
-                distance = 0;
-                duration = 0;
-                String data = (jsonArrayFromShared.get(i)).toString(); // {"typeTrack":"tr_irriga","coordinates":"{\","typeSubstance":"A1","amountSubstance":"15"}
-                jsonObjectForKey = new JSONObject(data); // Lo mismo del anterior pero en Object
-                String coordJsonInString = jsonObjectForKey.getString("coordinates");
-                JSONObject jsonCurrentCoordinates = new JSONObject(coordJsonInString); // Coordenadas de cada Key
-
-
-                for (int j = 0; i < jsonCurrentCoordinates.length() - 1; i++){
-                    String latLonToSplit_1 = jsonCurrentCoordinates.getString(String.valueOf(j));
-                    String latLonToSplit_2 = jsonCurrentCoordinates.getString(String.valueOf(j + 1));
-                    try {
-                        new DirectionFinder(this, latLonToSplit_1, latLonToSplit_2).execute();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        executeForOne();
     }
 
-//    @Override
-//    public void saveCoordinates(String coordinates, String dni, String company) {
-//        counter = 0;
-//        coords = coordinates;
-//        userId = dni;
-//        companyName = company;
-//        calculateDistanceAndTime(coordinates);
-//    }
+    public void executeForOne(){
+        for (int i = counterI; i < (jsonArrayFromShared.length()); i++) {
+            counterI += 1;
+            counterChildCoords = 0;
+            counterInTimer = 0;
+            distance = 0;
+            duration = 0;
+            try {
+                String data = (jsonArrayFromShared.get(i)).toString(); // {"typeTrack":"tr_irriga","coordinates":"{\","typeSubstance":"A1","amountSubstance":"15"}
+                jsonObjectForKey = new JSONObject(data); // Lo mismo del anterior pero en Object
+                String coordJsonInString = jsonObjectForKey.getString("coordinates");
+                jsonCurrentCoordinates = new JSONObject(coordJsonInString); // Coordenadas de cada Key
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            counterJ = 0;
+            executeForTwo();
+            break;
+        }
+    }
 
-//    public void calculateDistanceAndTime(String coordinates) {
-//        try {
-//            JSONObject jsonFromShared = new JSONObject(coordinates);
-//            coordinatesJson = jsonFromShared;
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        for (int i = 0; i < (coordinatesJson.length() - 1); i++) {
-//            try {
-//                String latLonToSplit_1 = coordinatesJson.getString(String.valueOf(i));
-//                String latLonToSplit_2 = coordinatesJson.getString(String.valueOf(i + 1));
-//                try {
-//                    new DirectionFinder(this, latLonToSplit_1, latLonToSplit_2).execute();
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    public void executeForTwo(){
+        for (j = counterJ; j < jsonCurrentCoordinates.length() - 1; j++) {
+            counterJ += 1;
+            String latLonToSplit_1 = null;
+            String latLonToSplit_2 = null;
+            try {
+                latLonToSplit_1 = jsonCurrentCoordinates.getString(String.valueOf(j));
+                latLonToSplit_2 = jsonCurrentCoordinates.getString(String.valueOf(j + 1));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                new DirectionFinder(TracingInteractorImpl.this, latLonToSplit_1, latLonToSplit_2).execute();
+                break;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public void onDirectionFinderStart() {
@@ -168,8 +161,6 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
         }
 
         if (counterChildCoords == (jsonCurrentCoordinates.length() - 1)){
-            // Aqui terminan las coordenadas de cada Key del Array principal
-
             counterMainArray += 1;
             try {
                 jsonObjectForKey.put("distance", distance);
@@ -180,7 +171,11 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 
             if (counterMainArray == jsonArrayFromShared.length()) {
                 repository.uploadData(jsonArrayToUpload, companyName, userId);
+            } else {
+                executeForOne();
             }
+        } else {
+            executeForTwo();
         }
     }
 }

@@ -50,7 +50,7 @@ public class GetCoordinates extends Service implements LocationListener, GpsStat
             mLocationManager.addGpsStatusListener(this);
             mLocationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    10000,
+                    7000,
                     0,
                     this);
         }

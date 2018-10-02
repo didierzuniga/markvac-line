@@ -8,7 +8,7 @@ import android.app.Activity;
 
 public interface TracingInteractor {
 //    void saveCoordinates(String coordinates, String dni, String company);
-    void saveCoordinates(String company, String typeTracking, String dni, String coordinates,
+    void saveCoordinates(String company, String typeTracking, String dni, String date, String time, String coordinates,
                          String typeSubstance, String amountSubstance, Activity activity);
     void uploadData(String company, String dni, Activity activity);
 }
