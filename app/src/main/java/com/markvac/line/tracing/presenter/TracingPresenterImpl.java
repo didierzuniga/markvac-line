@@ -22,9 +22,11 @@ public class TracingPresenterImpl implements TracingPresenter {
 
 
     @Override
-    public void saveCoordinates(String company, String typeTracking, String dni, String date, String time, String coordinates,
+    public void saveCoordinates(String company, String typeTracking, String dni, String dateInit, String timeInit,
+                                String dateFinal, String timeFinal, String coordinates,
                                 String typeSubstance, String amountSubstance, Tracing tracing) {
-        interactor.saveCoordinates(company, typeTracking, dni, date, time, coordinates, typeSubstance, amountSubstance, tracing);
+        interactor.saveCoordinates(company, typeTracking, dni, dateInit, timeInit, dateFinal, timeFinal,
+                                    coordinates, typeSubstance, amountSubstance, tracing);
     }
 
     @Override

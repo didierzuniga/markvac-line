@@ -61,10 +61,11 @@ public class TracingRepositoryImpl implements TracingRepository {
                 String time = jsonObjectForKey.getString("time");
                 String coords = jsonObjectForKey.getString("coordinates");
                 int distance = jsonObjectForKey.getInt("distance");
+                int duration = jsonObjectForKey.getInt("duration"); // Minutes
                 String typeSubstanc = jsonObjectForKey.getString("typeSubstance");
                 String amountSubstanc = jsonObjectForKey.getString("amountSubstance");
                 String path = companyName + "/" + typeTrack + "/" + dni + "/" + date + "/" + time;
-                TrackingSupervision traced = new TrackingSupervision(distance, 1, coords, typeSubstanc, amountSubstanc);
+                TrackingSupervision traced = new TrackingSupervision(distance, duration, coords, typeSubstanc, amountSubstanc);
                 referenceCompanies.child(path).setValue(traced);
             }
 

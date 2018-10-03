@@ -187,7 +187,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                         e.printStackTrace();
                     }
                     if (coordinatesJson.length() > 2) {
-                        confirmStoreCoordinates();
+                        confirmSaveCoordinates();
                     } else {
                         app.editor.putString("coordsTracing", null);
                         app.editor.commit();
@@ -319,8 +319,8 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                 long dat = System.currentTimeMillis();
                 SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
                 SimpleDateFormat time = new SimpleDateFormat("kk:mm:ss");
-                app.editor.putString("date", date.format(dat));
-                app.editor.putString("time", time.format(dat));
+                app.editor.putString("dateInit", date.format(dat));
+                app.editor.putString("timeInit", time.format(dat));
                 if (typeSelected == 0) {
                     app.editor.putString("typeTracking", "tr_superv");
                 } else {
@@ -336,6 +336,10 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                     app.editor.putString("substanceToApply", substanceName);
                     app.editor.putString("amountSubstance", amountSubstance.getText().toString());
                 }
+
+                // fehca inicial
+
+
                 btnPlayStop.setImageResource(R.drawable.ic_stop);
                 app.editor.putBoolean("allowRedrawLine", true);
                 app.editor.commit();
@@ -379,7 +383,7 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
         }
     };
 
-    public void confirmStoreCoordinates() {
+    public void confirmSaveCoordinates() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.message_successful_travel)
                 .setCancelable(false)
@@ -397,19 +401,28 @@ public class Tracing extends AppCompatActivity implements TracingView, Navigatio
                             }
                         });
 
+                        /// For Show Date
+                        long dat = System.currentTimeMillis();
+                        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+                        SimpleDateFormat time = new SimpleDateFormat("kk:mm:ss");
+
                         String coordinates = app.shaPref.getString("coordsTracing", null);
 
                         String typeTracking = app.shaPref.getString("typeTracking", "FallaShared");
-                        String date = app.shaPref.getString("date", "FallaShared");
-                        String time = app.shaPref.getString("time", "FallaShared");
+                        String dateInit = app.shaPref.getString("dateInit", "FallaShared");
+                        String timeInit = app.shaPref.getString("timeInit", "FallaShared");
+                        String dateFinal = date.format(dat);
+                        String timeFinal = time.format(dat);
                         if (typeTracking == "tr_superv"){
-                            presenter.saveCoordinates(app.company, typeTracking, app.dni, date, time,
-                                                      coordinates,"none", "none", Tracing.this);
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, dateInit, timeInit,
+                                                      dateFinal, timeFinal, coordinates,"none",
+                                                        "none", Tracing.this);
                         } else {
                             String typeSubstance = app.shaPref.getString("substanceToApply", "FallaShared");
                             String amountSubstance = app.shaPref.getString("amountSubstance", "FallaShared");
-                            presenter.saveCoordinates(app.company, typeTracking, app.dni, date, time,
-                                                      coordinates, typeSubstance, amountSubstance, Tracing.this);
+                            presenter.saveCoordinates(app.company, typeTracking, app.dni, dateInit, timeInit,
+                                                      dateFinal, timeFinal, coordinates, typeSubstance,
+                                                        amountSubstance, Tracing.this);
                         }
 
                     }

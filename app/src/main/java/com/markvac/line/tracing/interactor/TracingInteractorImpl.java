@@ -20,6 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,20 +48,37 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
     }
 
     @Override
-    public void saveCoordinates(String company, String typeTracking, String dni, String date, String time, String coordinates,
-                                String typeSubstance, String amountSubstance, Activity activity) {
+    public void saveCoordinates(String company, String typeTracking, String dni, String dateInit, String timeInit,
+                                String dateFinal, String timeFinal, String coordinates,
+                                String typeSubstance, String amountSubstance, Activity activity){
 
         app = (LineApplication) activity.getApplicationContext();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+        Date dateTimeInitial = null;
+        Date dateTimeFinal = null;
+        try {
+            dateTimeInitial = dateFormat.parse(dateInit + " " + timeInit);
+            dateTimeFinal = dateFormat.parse(dateFinal + " " + timeFinal);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long difference = dateTimeFinal.getTime() - dateTimeInitial.getTime();
+        long minutesInMilli = 1000 * 60;
+        long elapsedMinutes = difference / minutesInMilli;
+        int elapsedMinutesInteger = (int) elapsedMinutes;
         JSONObject dataJson = new JSONObject();
         JSONArray registerJson = new JSONArray();
+
 
         try {
             if (app.shaPref.getString("registerReadyToDB", null) != null) {
                 JSONArray jsonArrayFromShared = new JSONArray(app.shaPref.getString("registerReadyToDB", null));
                 dataJson.put("typeTrack", typeTracking);
-                dataJson.put("date", date);
-                dataJson.put("time", time);
+                dataJson.put("date", dateInit);
+                dataJson.put("time", timeInit);
                 dataJson.put("coordinates", coordinates);
+                dataJson.put("duration", elapsedMinutesInteger);
                 dataJson.put("typeSubstance", typeSubstance);
                 dataJson.put("amountSubstance", amountSubstance);
 
@@ -71,9 +91,10 @@ public class TracingInteractorImpl implements TracingInteractor, DirectionFinder
 
             } else {
                 dataJson.put("typeTrack", typeTracking);
-                dataJson.put("date", date);
-                dataJson.put("time", time);
+                dataJson.put("date", dateInit);
+                dataJson.put("time", timeInit);
                 dataJson.put("coordinates", coordinates);
+                dataJson.put("duration", elapsedMinutesInteger);
                 dataJson.put("typeSubstance", typeSubstance);
                 dataJson.put("amountSubstance", amountSubstance);
 
