@@ -33,14 +33,11 @@ public class TracingRepositoryImpl implements TracingRepository {
 
     private TracingPresenter presenter;
     private TracingInteractor interactor;
-    private LineApplication app;
     private JSONArray uploadToDB;
-    private String dateNow, timeNow, dni, companyName;
-    private int durat, distan;
+    private String dni, companyName;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference referenceCompanies = database.getReference("companies");
-    DatabaseReference referenceUsers = database.getReference("users");
 
     public TracingRepositoryImpl(TracingPresenter presenter, TracingInteractor interactor) {
         this.presenter = presenter;
@@ -68,11 +65,7 @@ public class TracingRepositoryImpl implements TracingRepository {
                 TrackingSupervision traced = new TrackingSupervision(distance, duration, coords, typeSubstanc, amountSubstanc);
                 referenceCompanies.child(path).setValue(traced);
             }
-
-//            timer.cancel();
             presenter.successfulUpload();
-//            dateNow = null;
-//            timeNow = null;
 
         } catch (JSONException e) {
             e.printStackTrace();
